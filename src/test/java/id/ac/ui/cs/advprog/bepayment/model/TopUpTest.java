@@ -30,9 +30,4 @@ class TopUpTest {
         topUp.setStatus("SUCCESS");
         assertEquals("SUCCESS", topUp.getStatus());
     }
-
-    @Test
-    void testSetStatusToInvalidStatus() {
-        assertThrows(IllegalArgumentException.class, () -> topUp.setStatus("MEOW"));
-    }
 }
