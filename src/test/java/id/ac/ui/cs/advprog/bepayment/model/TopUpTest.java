@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.bepayment.model;
 
+import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ class TopUpTest {
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
                 .amount(500)
                 .wallet(wallet)
-                .status("PENDING")
+                .status(TopUpStatus.WAITING_APPROVAL.getValue())
                 .build();
     }
 
@@ -30,12 +31,12 @@ class TopUpTest {
         assertEquals("eb558e9f-1c39-460e-8860-71af6af63bd6", topUp.getId());
         assertEquals(wallet, topUp.getWallet());
         assertEquals(500, topUp.getAmount());
-        assertEquals("PENDING", topUp.getStatus());
+        assertEquals(TopUpStatus.WAITING_APPROVAL.getValue(), topUp.getStatus());
     }
     @Test
     void testSetStatusValid() {
-        topUp.setStatus("REJECTED");
-        assertEquals("REJECTED", topUp.getStatus());
+        topUp.setStatus(TopUpStatus.REJECTED.getValue());
+        assertEquals(TopUpStatus.REJECTED.getValue(), topUp.getStatus());
     }
 
     @Test
@@ -54,20 +55,20 @@ class TopUpTest {
 
     @Test
     void testSetStatusWaitingApproval() {
-        topUp.setStatus("WAITING_APPROVAL");
-        assertEquals("WAITING_APPROVAL", topUp.getStatus());
+        topUp.setStatus(TopUpStatus.WAITING_APPROVAL.getValue());
+        assertEquals(TopUpStatus.WAITING_APPROVAL.getValue(), topUp.getStatus());
     }
 
     @Test
     void testSetStatusSuccess() {
-        topUp.setStatus("SUCCESS");
-        assertEquals("SUCCESS", topUp.getStatus());
+        topUp.setStatus(TopUpStatus.SUCCESS.getValue());
+        assertEquals(TopUpStatus.SUCCESS.getValue(), topUp.getStatus());
     }
 
     @Test
     void testSetStatusCanceled() {
-        topUp.setStatus("CANCELED");
-        assertEquals("CANCELED", topUp.getStatus());
+        topUp.setStatus(TopUpStatus.CANCELLED.getValue());
+        assertEquals(TopUpStatus.CANCELLED.getValue(), topUp.getStatus());
     }
 
     @Test
