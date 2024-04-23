@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum TopUpStatus{
-    WAITING_PAYMENT("WAITING_APPROVAL"),
+    WAITING_APPROVAL("WAITING_APPROVAL"),
     REJECTED("REJECTED"),
     SUCCESS("SUCCESS"),
     CANCELLED("CANCELLED");
