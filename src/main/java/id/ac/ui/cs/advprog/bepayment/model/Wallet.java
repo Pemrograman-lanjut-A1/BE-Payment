@@ -21,5 +21,8 @@ public class Wallet {
     private Integer amount;
 
     public Wallet(String id, String userId, int amount) {
+        this.id = id;
+        this.userId = userId;
+        this.amount = amount;
     }
 }
