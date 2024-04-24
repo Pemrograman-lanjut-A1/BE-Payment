@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
 public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +21,7 @@ public class Wallet {
     private String userId;
     private Integer amount;
 
-    public Wallet(String id, String userId, int amount) {
+    public Wallet(String id, String userId, Integer amount) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;

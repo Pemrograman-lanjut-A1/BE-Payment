@@ -11,10 +11,11 @@ class WalletTest {
 
     @BeforeEach
     void setUp() {
-        wallet = new Wallet(
-                "1",
-                "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649",
-                500);
+        wallet = Wallet.builder()
+                .id("1")
+                .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
+                .amount(500)
+                .build();
     }
 
     @Test
