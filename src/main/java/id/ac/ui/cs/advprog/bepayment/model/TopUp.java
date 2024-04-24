@@ -1,30 +1,37 @@
 package id.ac.ui.cs.advprog.bepayment.model;
 
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
-import lombok.Builder;
+import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
-import java.util.Arrays;
+import java.util.UUID;
 
-@Builder
 @Getter
-@Setter
+@NoArgsConstructor
+@Entity(name = "topup")
 public class TopUp {
-    String id;
-    String userId;
-    Wallet wallet;
-    double amount;
-    TopUpStatus status;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private String id;
+    private String userId;
+    @ManyToOne
+    @JoinColumn(name = "wallet_id")
+    private Wallet wallet;
+    private double amount;
+    private TopUpStatus status;
 
-    public void setStatus(TopUpStatus status) {
-        this.status = status;
-    }
-    public void setAmount(double amount){
-        if(amount <= 0){
-            throw new IllegalArgumentException();
-        }else{
-            this.amount = amount;
+    public TopUp(String userId, Wallet wallet, double amount, TopUpStatus status) {
+        if (userId == null || wallet == null) {
+            throw new IllegalArgumentException("UserId and Wallet cannot be null");
         }
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than 0");
+        }
+        this.id = UUID.randomUUID().toString();
+        this.userId = userId;
+        this.wallet = wallet;
+        this.amount = amount;
+        this.status = status;
     }
 }
