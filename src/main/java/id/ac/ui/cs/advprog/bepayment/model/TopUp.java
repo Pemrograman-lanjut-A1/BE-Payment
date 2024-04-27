@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity(name = "topup")
 public class TopUp {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String userId;
     @ManyToOne
@@ -32,6 +32,16 @@ public class TopUp {
         this.userId = userId;
         this.wallet = wallet;
         this.amount = amount;
+        this.status = status;
+    }
+    public void setAmount(double amount) {
+        if(amount <= 0){
+            throw new IllegalArgumentException("Amount must be greater than 0");
+        }
+        this.amount = amount;
+    }
+
+    public void setStatus(TopUpStatus status) {
         this.status = status;
     }
 }

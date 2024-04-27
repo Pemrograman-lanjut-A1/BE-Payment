@@ -39,36 +39,34 @@ class TopUpTest {
 
     @Test
     void testSetStatusValid() {
-        topUpBuilder.setStatus(TopUpStatus.REJECTED);
-        topUp = topUpBuilder.build();
+        topUp.setStatus(TopUpStatus.REJECTED);
         assertEquals(TopUpStatus.REJECTED, topUp.getStatus());
     }
 
     @Test
     void testSetStatusInvalid() {
         assertThrows(IllegalArgumentException.class, () -> {
-            topUpBuilder.setStatus(TopUpStatus.valueOf("INVALID_STATUS"));
+            topUp.setStatus(TopUpStatus.valueOf("INVALID_STATUS"));
         });
     }
 
     @Test
     void testSetAmountValid() {
-        topUpBuilder.setAmount(1000);
-        topUp = topUpBuilder.build();
+        topUp.setAmount(1000);
         assertEquals(1000, topUp.getAmount());
     }
 
     @Test
     void testSetAmountNegative() {
         assertThrows(IllegalArgumentException.class, () -> {
-            topUpBuilder.setAmount(-1000);
+            topUp.setAmount(-1000);
         });
     }
 
     @Test
     void testSetAmountZero() {
         assertThrows(IllegalArgumentException.class, () -> {
-            topUpBuilder.setAmount(0);
+            topUp.setAmount(0);
         });
     }
 }

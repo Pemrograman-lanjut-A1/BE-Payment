@@ -31,17 +31,6 @@ public class TopUpBuilder {
         return this;
     }
 
-    public void setAmount(double amount) {
-        if(amount <= 0){
-            throw new IllegalArgumentException("Amount must be greater than 0");
-        }
-        this.amount = amount;
-    }
-
-    public void setStatus(TopUpStatus status) {
-        this.status = status;
-    }
-
     public TopUp build() {
         if (userId == null || wallet == null) {
             throw new IllegalArgumentException("UserId and Wallet cannot be null");
