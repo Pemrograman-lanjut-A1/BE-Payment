@@ -1,40 +1,61 @@
 package id.ac.ui.cs.advprog.bepayment.service;
 
+import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 import id.ac.ui.cs.advprog.bepayment.model.TopUp;
+import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
+import id.ac.ui.cs.advprog.bepayment.model.Wallet;
+import id.ac.ui.cs.advprog.bepayment.pojos.TopUpRequest;
+import id.ac.ui.cs.advprog.bepayment.repository.TopUpRepository;
+import id.ac.ui.cs.advprog.bepayment.repository.TopUpRepositoryImpl;
+import id.ac.ui.cs.advprog.bepayment.repository.WalletRepository;
+import jakarta.persistence.NoResultException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TopUpServiceImpl implements TopUpService {
 
+    @Autowired
+    private TopUpRepository topUpRepository;
+    @Autowired
+    private WalletRepository walletRepository;
     @Override
-    public TopUp createTopUp() {
+    @Transactional
+    public TopUp createTopUp(TopUpRequest topUpRequest) {
         return null;
     }
 
     @Override
+    @Transactional
     public void deleteAllTopUp() {
 
     }
 
     @Override
-    public void deleteTopUpById(String topUpId) {
-
+    @Transactional
+    public boolean deleteTopUpById(String topUpId) {
+        return false;
     }
 
     @Override
-    public void cancelTopUp(String topUpId) {
-
+    @Transactional
+    public boolean cancelTopUp(String topUpId) {
+        return false;
     }
 
     @Override
+    @Transactional
     public TopUp findById(String topUpId) {
         return null;
     }
 
     @Override
+    @Transactional
     public List<TopUp> findAll() {
         return null;
     }
