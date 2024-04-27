@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 
 public class TopUpRequest {
     public String userId;
-    public Wallet wallet_id;
+    public String walletId;
     public double amount;
-    public TopUpStatus status;
 }
