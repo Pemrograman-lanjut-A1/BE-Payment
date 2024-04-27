@@ -2,11 +2,19 @@ package id.ac.ui.cs.advprog.bepayment.model;
 
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 
+import java.util.UUID;
+
 public class TopUpBuilder {
+    private String id;
     private String userId;
     private Wallet wallet;
     private double amount;
     private TopUpStatus status;
+
+    public TopUpBuilder id(String id) {
+        this.id = id;
+        return this;
+    }
 
     public TopUpBuilder userId(String userId) {
         this.userId = userId;
@@ -41,6 +49,6 @@ public class TopUpBuilder {
         if (status == null){
             status = TopUpStatus.WAITING_APPROVAL;
         }
-        return new TopUp(userId, wallet, amount, status);
+        return new TopUp(id, userId, wallet, amount, status);
     }
 }
