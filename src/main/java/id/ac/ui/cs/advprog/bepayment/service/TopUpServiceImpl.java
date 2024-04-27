@@ -27,36 +27,62 @@ public class TopUpServiceImpl implements TopUpService {
     @Override
     @Transactional
     public TopUp createTopUp(TopUpRequest topUpRequest) {
-        return null;
+        Wallet wallet = walletRepository.findById(topUpRequest.walletId);
+        String topUpId = String.valueOf(UUID.randomUUID());
+        TopUp topUp = new TopUpBuilder()
+                .id(topUpId)
+                .userId(topUpRequest.userId)
+                .wallet(wallet)
+                .amount(topUpRequest.amount)
+                .status(TopUpStatus.WAITING_APPROVAL)
+                .build();
+
+        return topUpRepository.save(topUp);
     }
 
     @Override
     @Transactional
     public void deleteAllTopUp() {
-
+        topUpRepository.deleteAll();
     }
 
     @Override
     @Transactional
     public boolean deleteTopUpById(String topUpId) {
-        return false;
+        if (topUpRepository.findById(topUpId) == null){
+            return false;
+        }
+        try {
+            topUpRepository.deleteTopUpById(topUpId);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     @Override
     @Transactional
     public boolean cancelTopUp(String topUpId) {
-        return false;
+        if (topUpRepository.findById(topUpId) == null){
+            return false;
+        }
+        try {
+            topUpRepository.cancelTopUp(topUpId);
+            return true;
+        } catch (NoResultException e) {
+            return false;
+        }
     }
 
     @Override
     @Transactional
     public TopUp findById(String topUpId) {
-        return null;
+        return topUpRepository.findById(topUpId);
     }
 
     @Override
     @Transactional
     public List<TopUp> findAll() {
-        return null;
+        return topUpRepository.findAll();
     }
 }
