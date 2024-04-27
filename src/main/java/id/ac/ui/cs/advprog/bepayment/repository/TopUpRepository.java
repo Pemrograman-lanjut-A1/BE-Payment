@@ -7,8 +7,8 @@ import java.util.List;
 public interface TopUpRepository {
     public TopUp save(TopUp topUp);
     public void deleteAll();
-    public void deleteTopUpById(String topUpId);
-    public void cancelTopUp(String topUpId);
+    public boolean deleteTopUpById(String topUpId);
+    public boolean cancelTopUp(String topUpId);
     public TopUp findById(String id);
     public List<TopUp> findAll();
 }
