@@ -98,6 +98,11 @@ public class TopUpController {
         }
     }
 
+    @PutMapping("/{topUpId}/confirm")
+    public ResponseEntity<?> confirmTopUp(@PathVariable("topUpId") String topUpId){
+        return null;
+    }
+
     @GetMapping("/")
     public ResponseEntity<?> getAllTopUps(){
         try {
