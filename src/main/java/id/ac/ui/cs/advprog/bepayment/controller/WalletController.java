@@ -20,6 +20,17 @@ public class WalletController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createWallet(@RequestBody WalletRequest walletRequest){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try{
+            Wallet createdWallet = walletService.createWallet(walletRequest);
+            response.put("wallet", createdWallet);
+            response.put("message", "Wallet Created Successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 }
