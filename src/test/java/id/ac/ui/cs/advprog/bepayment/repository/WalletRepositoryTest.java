@@ -3,16 +3,15 @@ package id.ac.ui.cs.advprog.bepayment.repository;
 
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class WalletRepositoryTest {
 
@@ -21,6 +20,9 @@ public class WalletRepositoryTest {
 
     @InjectMocks
     private WalletRepositoryImpl walletRepository;
+
+    @Mock
+    private Query query;
 
     private Wallet wallet;
 
@@ -32,6 +34,7 @@ public class WalletRepositoryTest {
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
                 .amount(500)
                 .build();
+        when(entityManager.createQuery(anyString())).thenReturn(query);
     }
 
     @Test
@@ -55,7 +58,7 @@ public class WalletRepositoryTest {
     }
 
     @Test
-    public void testFindByIdUnhappyPathDifferentId() {
+    public void testFindByIdDifferentId() {
         when(entityManager.find(Wallet.class, "999")).thenReturn(null);
 
         Wallet foundWallet = walletRepository.findById("999");
@@ -63,6 +66,42 @@ public class WalletRepositoryTest {
         verify(entityManager).find(Wallet.class, "999");
 
         assertNull(foundWallet);
+    }
+
+    @Test
+    public void testAddAmount() {
+        String walletId = "1";
+        double totalAmount = 1000.0;
+
+        when(query.setParameter(anyString(), any())).thenReturn(query);
+
+        walletRepository.addAmount(walletId, totalAmount);
+
+        verify(entityManager, times(1))
+                .createQuery("UPDATE wallet w SET w.amount = :totalAmount WHERE w.id = :walletId");
+        verify(query, times(1)).setParameter("totalAmount", totalAmount);
+        verify(query, times(1)).setParameter("walletId", walletId);
+        verify(query, times(1)).executeUpdate();
+        
+    }
+
+    @Test
+    public void testAddAmount_UnsuccessfulUpdate() {
+        String walletId = "1";
+        double totalAmount = 1000.0;
+
+        when(query.setParameter(anyString(), any())).thenReturn(query);
+        when(query.executeUpdate()).thenReturn(0);
+
+        walletRepository.addAmount(walletId, totalAmount);
+
+        verify(entityManager, times(1))
+                .createQuery("UPDATE wallet w SET w.amount = :totalAmount WHERE w.id = :walletId");
+        verify(query, times(1)).setParameter("totalAmount", totalAmount);
+        verify(query, times(1)).setParameter("walletId", walletId);
+        verify(query, times(1)).executeUpdate();
+
+        assertEquals(500, wallet.getAmount());
     }
 
 }
