@@ -15,8 +15,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class WalletServiceTest {
@@ -74,5 +73,31 @@ public class WalletServiceTest {
         verify(walletRepository).findById("2");
 
         assertNull(foundWallet);
+    }
+
+    @Test
+    public void testAddAmountDelegatesCorrectly() {
+        String walletId = "1";
+        double totalAmount = 1000.0;
+
+        walletRepository.addAmount(walletId, totalAmount);
+
+        verify(walletRepository, times(1)).addAmount(walletId, totalAmount);
+    }
+
+    @Test
+    public void testAddAmountDelegationFailure() {
+        String walletId = "1";
+        double totalAmount = 1000.0;
+
+        doThrow(new RuntimeException("Failed to add amount")).when(walletRepository).addAmount(walletId, totalAmount);
+
+        try {
+            walletRepository.addAmount(walletId, totalAmount);
+            fail("Expected RuntimeException was not thrown");
+        } catch (RuntimeException e) {
+            verify(walletRepository, times(1)).addAmount(walletId, totalAmount);
+            assertEquals("Failed to add amount", e.getMessage());
+        }
     }
 }
