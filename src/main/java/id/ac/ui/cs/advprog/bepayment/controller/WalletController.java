@@ -36,6 +36,20 @@ public class WalletController {
     }
     @GetMapping("/{walletId}")
     public ResponseEntity<?> getTopUpById(@PathVariable("walletId") String walletId){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Wallet wallet = walletService.findById(walletId);
+            if (wallet == null){
+                response.put("code", HttpStatus.NOT_FOUND.value());
+                response.put("message", "Wallet with ID " + walletId + " not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            return ResponseEntity.ok(wallet);
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 }
