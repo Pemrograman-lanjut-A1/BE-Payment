@@ -192,4 +192,38 @@ public class TopUpControllerTest {
         assertTrue(responseEntity.getBody().toString().contains("Something Wrong With Server"));
     }
 
+    @Test
+    void testGetTopUpByIdSuccessful() {
+        String topUpId = "123";
+        TopUp expectedTopUp = new TopUp();
+        when(topUpService.findById(topUpId)).thenReturn(expectedTopUp);
+
+        ResponseEntity<?> responseEntity = topUpController.getTopUpById(topUpId);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(expectedTopUp, responseEntity.getBody());
+    }
+
+    @Test
+    void testGetTopUpByIdTopUpNotFound() {
+        String topUpId = "789";
+        when(topUpService.findById(topUpId)).thenReturn(null);
+
+        ResponseEntity<?> responseEntity = topUpController.getTopUpById(topUpId);
+
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getBody().toString().contains("Top-up with ID " + topUpId + " not found"));
+    }
+
+    @Test
+    void testGetTopUpByIdInternalServerError() {
+        String topUpId = "456";
+        when(topUpService.findById(topUpId)).thenThrow(new RuntimeException("Internal Server Error"));
+
+        ResponseEntity<?> responseEntity = topUpController.getTopUpById(topUpId);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getBody().toString().contains("Something Wrong With Server"));
+    }
+
 }
