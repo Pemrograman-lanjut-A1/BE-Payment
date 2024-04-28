@@ -100,7 +100,24 @@ public class TopUpController {
 
     @PutMapping("/{topUpId}/confirm")
     public ResponseEntity<?> confirmTopUp(@PathVariable("topUpId") String topUpId){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean confirmed = topUpService.confirmTopUp(topUpId);
+            if (confirmed) {
+                response.put("code", HttpStatus.OK.value());
+                response.put("message", "Top-up with ID " + topUpId +" confirmed successfully.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("code", HttpStatus.NOT_FOUND.value());
+                response.put("message", "Top-up with ID " + topUpId + " not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @GetMapping("/")
