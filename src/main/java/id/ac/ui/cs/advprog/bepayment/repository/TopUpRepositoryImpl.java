@@ -54,6 +54,13 @@ public class TopUpRepositoryImpl implements TopUpRepository {
             return false;
         }
     }
+
+    @Override
+    @Transactional
+    public boolean confirmTopUp(String topUpId) {
+        return false;
+    }
+
     @Override
     @Transactional
     public TopUp findById(String id){

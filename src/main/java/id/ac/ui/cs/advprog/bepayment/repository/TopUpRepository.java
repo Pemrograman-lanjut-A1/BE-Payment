@@ -9,6 +9,7 @@ public interface TopUpRepository {
     public void deleteAll();
     public boolean deleteTopUpById(String topUpId);
     public boolean cancelTopUp(String topUpId);
+    public boolean confirmTopUp(String topUpId);
     public TopUp findById(String id);
     public List<TopUp> findAll();
 }
