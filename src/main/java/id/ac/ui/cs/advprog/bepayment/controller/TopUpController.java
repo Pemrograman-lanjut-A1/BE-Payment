@@ -23,28 +23,93 @@ public class TopUpController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createTopUp(@RequestBody TopUpRequest topUpRequest){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try{
+            TopUp createdTopUp = topUpService.createTopUp(topUpRequest);
+            response.put("topUp", createdTopUp);
+            response.put("message", "Topup Created Successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
 
     }
 
     @DeleteMapping("/")
     public ResponseEntity<?> deleteAllTopUp(){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            topUpService.deleteAllTopUp();
+            response.put("code", HttpStatus.OK.value());
+            response.put("message", "All top-ups deleted successfully.");
+            return ResponseEntity.ok(response);
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @DeleteMapping("/{topUpId}/delete")
     public ResponseEntity<?> deleteTopUpById(@PathVariable("topUpId") String topUpId){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean deleted = topUpService.deleteTopUpById(topUpId);
+            if (deleted) {
+                response.put("code", HttpStatus.OK.value());
+                response.put("message", "Top-up with ID " + topUpId + " deleted successfully.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("code", HttpStatus.NOT_FOUND.value());
+                response.put("message", "Top-up with ID " + topUpId + " not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @PutMapping("/{topUpId}/cancel")
     public ResponseEntity<?> cancelTopUp(@PathVariable("topUpId") String topUpId){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean cancelled = topUpService.cancelTopUp(topUpId);
+            if (cancelled) {
+                response.put("code", HttpStatus.OK.value());
+                response.put("message", "Top-up with ID " + topUpId +" cancelled successfully.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("code", HttpStatus.NOT_FOUND.value());
+                response.put("message", "Top-up with ID " + topUpId + " not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @GetMapping("/")
     public ResponseEntity<?> getAllTopUps(){
-        return null;
+        try {
+            List<TopUp> topUps = topUpService.findAll();
+            return ResponseEntity.ok(topUps);
+        }catch (Exception e){
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 }
