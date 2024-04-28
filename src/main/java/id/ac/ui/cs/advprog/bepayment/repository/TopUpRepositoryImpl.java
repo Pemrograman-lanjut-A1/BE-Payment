@@ -58,7 +58,15 @@ public class TopUpRepositoryImpl implements TopUpRepository {
     @Override
     @Transactional
     public boolean confirmTopUp(String topUpId) {
-        return false;
+        try {
+            entityManager.createQuery("UPDATE topup t SET t.status = :status WHERE t.id = :topUpId")
+                    .setParameter("status", TopUpStatus.SUCCESS)
+                    .setParameter("topUpId", topUpId)
+                    .executeUpdate();
+            return true;
+        } catch (NoResultException e) {
+            return false;
+        }
     }
 
     @Override
