@@ -124,6 +124,34 @@ public class TopUpServiceTest {
     }
 
     @Test
+    public void testConfirmTopUpValidTopUpIdSuccess() {
+        String topUpId = topUp.getId();
+        double topUpAmount = topUp.getAmount();
+        double walletAmount = wallet.getAmount();
+
+        when(topUpRepository.findById(eq(topUpId))).thenReturn(topUp);
+
+        boolean result = topUpService.confirmTopUp(topUpId);
+
+        assertTrue(result, "confirmTopUp should return true for a valid top up ID");
+        verify(topUpRepository, times(1)).findById(eq(topUpId));
+        verify(topUpRepository, times(1)).confirmTopUp(eq(topUpId));
+        verify(walletRepository, times(1)).addAmount(eq("1"), eq(topUpAmount + walletAmount));
+    }
+
+    @Test
+    public void testConfirmTopUpInvalidTopUpIdFailure() {
+        String topUpId = "invalid-top-up-id";
+
+        when(topUpRepository.findById(anyString())).thenReturn(null);
+
+        boolean result = topUpService.confirmTopUp(topUpId);
+
+        assertFalse(result, "confirmTopUp should return false for an invalid top up ID");
+        verify(topUpRepository, times(1)).findById(topUpId);
+    }
+
+    @Test
     void findByIdExistingTopUpIdReturnsTopUp() {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
         TopUp expectedTopUp = new TopUp();
