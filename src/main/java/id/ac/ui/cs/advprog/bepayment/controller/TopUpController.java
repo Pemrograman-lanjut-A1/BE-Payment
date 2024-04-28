@@ -134,4 +134,9 @@ public class TopUpController {
         }
     }
 
+    @GetMapping("/{topUpId}")
+    public ResponseEntity<?> getTopUpById(@PathVariable("topUpId") String topUpId){
+        return null;
+    }
+
 }
