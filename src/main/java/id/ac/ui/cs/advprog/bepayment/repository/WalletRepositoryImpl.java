@@ -14,11 +14,12 @@ public class WalletRepositoryImpl implements WalletRepository{
 
     @Override
     public Wallet save(Wallet wallet) {
-        return null;
+        entityManager.merge(wallet);
+        return wallet;
     }
 
     @Override
     public Wallet findById(String id){
-        return null;
+        return entityManager.find(Wallet.class, id);
     }
 }
