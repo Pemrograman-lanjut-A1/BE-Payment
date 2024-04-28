@@ -82,11 +82,11 @@ public class WalletRepositoryTest {
         verify(query, times(1)).setParameter("totalAmount", totalAmount);
         verify(query, times(1)).setParameter("walletId", walletId);
         verify(query, times(1)).executeUpdate();
-        
+
     }
 
     @Test
-    public void testAddAmount_UnsuccessfulUpdate() {
+    public void testAddAmountUnsuccessfulUpdate() {
         String walletId = "1";
         double totalAmount = 1000.0;
 
