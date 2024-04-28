@@ -32,7 +32,7 @@ public class WalletServiceImpl implements WalletService{
     @Override
     @Transactional
     public void addAmount(String walletId, double totalAmount) {
-
+        walletRepository.addAmount(walletId, totalAmount);
     }
 
     @Override
