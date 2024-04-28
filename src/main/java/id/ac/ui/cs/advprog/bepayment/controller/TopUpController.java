@@ -136,7 +136,21 @@ public class TopUpController {
 
     @GetMapping("/{topUpId}")
     public ResponseEntity<?> getTopUpById(@PathVariable("topUpId") String topUpId){
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            TopUp topUp = topUpService.findById(topUpId);
+            if (topUp == null){
+                response.put("code", HttpStatus.NOT_FOUND.value());
+                response.put("message", "Top-up with ID " + topUpId + " not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            return ResponseEntity.ok(topUp);
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 }
