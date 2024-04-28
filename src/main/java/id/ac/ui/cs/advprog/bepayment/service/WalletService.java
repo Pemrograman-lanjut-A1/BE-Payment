@@ -7,5 +7,6 @@ import id.ac.ui.cs.advprog.bepayment.pojos.WalletRequest;
 
 public interface WalletService {
     public Wallet createWallet(WalletRequest walletRequest);
+    public void addAmount(String walletId, double totalAmount);
     public Wallet findById(String walletId);
 }

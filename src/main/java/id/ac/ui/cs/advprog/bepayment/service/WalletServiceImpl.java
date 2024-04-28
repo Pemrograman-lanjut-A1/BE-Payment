@@ -31,6 +31,12 @@ public class WalletServiceImpl implements WalletService{
 
     @Override
     @Transactional
+    public void addAmount(String walletId, double totalAmount) {
+
+    }
+
+    @Override
+    @Transactional
     public Wallet findById(String walletId) {
         return walletRepository.findById(walletId);
     }
