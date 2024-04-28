@@ -80,7 +80,20 @@ public class TopUpServiceImpl implements TopUpService {
     @Override
     @Transactional
     public boolean confirmTopUp(String topUpId) {
-        return false;
+        TopUp topUp = topUpRepository.findById(topUpId);
+        if (topUp == null){
+            return false;
+        }
+        try {
+            double totalAmount = topUp.getAmount() + topUp.getWallet().getAmount();
+            topUpRepository.confirmTopUp(topUpId);
+            walletRepository.addAmount(topUp.getWallet().getId(), totalAmount);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error in confirmTopUp: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
