@@ -20,12 +20,18 @@ public class WalletServiceImpl implements WalletService{
     @Override
     @Transactional
     public Wallet createWallet(WalletRequest walletRequest) {
-        return null;
+        String walletId = String.valueOf(UUID.randomUUID());
+        Wallet wallet = Wallet.builder()
+                .id(walletId)
+                .userId(walletRequest.userId)
+                .amount(0)
+                .build();
+        return walletRepository.save(wallet);
     }
 
     @Override
     @Transactional
     public Wallet findById(String walletId) {
-        return null;
+        return walletRepository.findById(walletId);
     }
 }
