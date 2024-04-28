@@ -5,6 +5,7 @@ import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +78,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testDeleteAll_NoQuery() {
+    public void testDeleteAllNoQuery() {
         when(entityManager.createQuery(anyString())).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> topUpRepository.deleteAll());
@@ -107,7 +108,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testDeleteTopUpById_NoQuery() {
+    public void testDeleteTopUpByIdNoQuery() {
         when(entityManager.createQuery(anyString())).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> topUpRepository.deleteTopUpById("123"));
@@ -137,11 +138,42 @@ public class TopUpRepositoryTest {
 
 
     @Test
-    public void testCancelTopUp_NoQuery() {
+    public void testCancelTopUpNoQuery() {
         when(entityManager.createQuery(anyString())).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> topUpRepository.cancelTopUp("123"));
     }
+
+    @Test
+    public void testConfirmTopUpSuccessfulUpdate() {
+        String topUpId = "valid-top-up-id";
+        Query query = mock(Query.class);
+        when(entityManager.createQuery(anyString())).thenReturn(query);
+        when(query.setParameter(eq("status"), any())).thenReturn(query);
+        when(query.setParameter(eq("topUpId"), eq(topUpId))).thenReturn(query);
+        when(query.executeUpdate()).thenReturn(1);
+
+        boolean result = topUpRepository.confirmTopUp(topUpId);
+
+        assertTrue(result, "confirmTopUp should return true for a successful update");
+        verify(entityManager, times(1)).createQuery(anyString());
+        verify(query, times(1)).setParameter(eq("status"), any());
+        verify(query, times(1)).setParameter(eq("topUpId"), eq(topUpId));
+        verify(query, times(1)).executeUpdate();
+    }
+
+    @Test
+    public void testConfirmTopUpNoResultException() {
+        String topUpId = "invalid-top-up-id";
+        when(entityManager.createQuery(anyString())).thenThrow(new NoResultException());
+
+        boolean result = topUpRepository.confirmTopUp(topUpId);
+
+        assertFalse(result, "confirmTopUp should return false for an invalid top up ID");
+        verify(entityManager, times(1)).createQuery(anyString());
+    }
+
+
 
     @Test
     public void testFindById() {
@@ -155,7 +187,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testFindById_NotFound() {
+    public void testFindByIdNotFound() {
         when(entityManager.find(eq(TopUp.class), any())).thenReturn(null);
 
         assertNull(topUpRepository.findById("123"));
@@ -176,7 +208,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testFindAll_EmptyResult() {
+    public void testFindAllEmptyResult() {
         List<TopUp> expectedTopUps = Collections.emptyList();
         TypedQuery<TopUp> typedQuery = mock(TypedQuery.class);
         when(entityManager.createQuery(anyString(), eq(TopUp.class))).thenReturn(typedQuery);
