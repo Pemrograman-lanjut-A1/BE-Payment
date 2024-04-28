@@ -11,6 +11,7 @@ public interface TopUpService {
     public void deleteAllTopUp();
     public boolean deleteTopUpById(String topUpId);
     public boolean cancelTopUp(String topUpId);
+    public boolean confirmTopUp(String topUpId);
     public TopUp findById(String topUpId);
     public List<TopUp> findAll();
 }

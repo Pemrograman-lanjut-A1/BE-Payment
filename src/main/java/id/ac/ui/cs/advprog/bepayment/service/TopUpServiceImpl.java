@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -69,9 +70,17 @@ public class TopUpServiceImpl implements TopUpService {
         try {
             topUpRepository.cancelTopUp(topUpId);
             return true;
-        } catch (NoResultException e) {
+        } catch (Exception e) {
+            System.err.println("Error in confirmTopUp: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    @Transactional
+    public boolean confirmTopUp(String topUpId) {
+        return false;
     }
 
     @Override
