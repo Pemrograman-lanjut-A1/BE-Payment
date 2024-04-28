@@ -11,11 +11,11 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Builder
+@Entity(name = "wallet")
 public class Wallet {
     @Id
     private String id;
