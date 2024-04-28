@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.bepayment.controller;
 
+import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import id.ac.ui.cs.advprog.bepayment.pojos.WalletRequest;
 import id.ac.ui.cs.advprog.bepayment.service.WalletService;
@@ -32,5 +33,9 @@ public class WalletController {
             response.put("message", "Something Wrong With Server");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+    @GetMapping("/{walletId}")
+    public ResponseEntity<?> getTopUpById(@PathVariable("walletId") String walletId){
+        return null;
     }
 }
