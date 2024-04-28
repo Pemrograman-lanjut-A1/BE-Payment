@@ -15,7 +15,7 @@ public class TopUp {
     private String id;
     private String userId;
     @ManyToOne
-    @JoinColumn(name = "wallet_id")
+    @JoinColumn(name = "walletId")
     private Wallet wallet;
     private double amount;
     private TopUpStatus status;
