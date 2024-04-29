@@ -2,11 +2,19 @@ package id.ac.ui.cs.advprog.bepayment.model;
 
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 
+import java.util.UUID;
+
 public class TopUpBuilder {
+    private String id;
     private String userId;
     private Wallet wallet;
     private double amount;
     private TopUpStatus status;
+
+    public TopUpBuilder id(String id) {
+        this.id = id;
+        return this;
+    }
 
     public TopUpBuilder userId(String userId) {
         this.userId = userId;
@@ -31,17 +39,6 @@ public class TopUpBuilder {
         return this;
     }
 
-    public void setAmount(double amount) {
-        if(amount <= 0){
-            throw new IllegalArgumentException("Amount must be greater than 0");
-        }
-        this.amount = amount;
-    }
-
-    public void setStatus(TopUpStatus status) {
-        this.status = status;
-    }
-
     public TopUp build() {
         if (userId == null || wallet == null) {
             throw new IllegalArgumentException("UserId and Wallet cannot be null");
@@ -52,6 +49,6 @@ public class TopUpBuilder {
         if (status == null){
             status = TopUpStatus.WAITING_APPROVAL;
         }
-        return new TopUp(userId, wallet, amount, status);
+        return new TopUp(id, userId, wallet, amount, status);
     }
 }

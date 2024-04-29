@@ -9,19 +9,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+import java.util.UUID;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @Builder
+@Entity(name = "wallet")
 public class Wallet {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private String userId;
-    private Integer amount;
+    private double amount;
 
-    public Wallet(String id, String userId, Integer amount) {
+    public Wallet(String id, String userId, double amount) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
