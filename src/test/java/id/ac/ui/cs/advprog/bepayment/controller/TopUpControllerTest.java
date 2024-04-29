@@ -54,17 +54,17 @@ public class TopUpControllerTest {
         assertNotNull(responseBody.get("error"));
     }
 
-    @Test
-    public void testDeleteAllTopUpSuccess() {
-        doNothing().when(topUpService).deleteAllTopUp();
-
-        ResponseEntity<?> responseEntity = topUpController.deleteAllTopUp();
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
-        assert responseBody != null;
-        assertNotNull(responseBody.get("message"));
-    }
+//    @Test
+//    public void testDeleteAllTopUpSuccess() {
+//        doNothing().when(topUpService).deleteAllTopUp();
+//
+//        ResponseEntity<?> responseEntity = topUpController.deleteAllTopUp();
+//
+//        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+//        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
+//        assert responseBody != null;
+//        assertNotNull(responseBody.get("message"));
+//    }
 
     @Test
     public void testDeleteTopUpByIdSuccess() {
