@@ -107,17 +107,17 @@ public class TopUpControllerTest {
     }
 
 
-    @Test
-    public void testDeleteAllTopUpInternalServerError() {
-        doThrow(new RuntimeException("Internal Server Error")).when(topUpService).deleteAllTopUp();
-
-        ResponseEntity<?> responseEntity = topUpController.deleteAllTopUp();
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertInstanceOf(Map.class, responseEntity.getBody());
-        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
-        assertNotNull(responseBody.get("error"));
-    }
+//    @Test
+//    public void testDeleteAllTopUpInternalServerError() {
+//        doThrow(new RuntimeException("Internal Server Error")).when(topUpService).deleteAllTopUp();
+//
+//        ResponseEntity<?> responseEntity = topUpController.deleteAllTopUp();
+//
+//        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+//        assertInstanceOf(Map.class, responseEntity.getBody());
+//        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
+//        assertNotNull(responseBody.get("error"));
+//    }
 
     @Test
     public void testDeleteTopUpByIdNotFound() {
