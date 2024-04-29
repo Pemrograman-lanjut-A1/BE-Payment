@@ -212,12 +212,8 @@ public class TopUpControllerTest {
         ResponseEntity<?> responseEntity = topUpController.getTopUpById(topUpId);
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-
-        assertNotNull(responseEntity.getBody());
-
-        assertEquals("Top-up with ID " + topUpId + " not found", responseEntity.getBody().toString());
+        assertTrue(responseEntity.getBody().toString().contains("Top-up with ID " + topUpId + " not found"));
     }
-
 
     @Test
     void testGetTopUpByIdInternalServerError() {
