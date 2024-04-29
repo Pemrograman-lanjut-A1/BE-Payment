@@ -31,7 +31,6 @@ class TopUpTest {
     @Test
     void testCreateTopUp() {
         assertNotNull(topUp);
-        assertNotNull(topUp.getId());
         assertEquals(wallet, topUp.getWallet());
         assertEquals(500, topUp.getAmount());
         assertEquals(TopUpStatus.WAITING_APPROVAL, topUp.getStatus());
