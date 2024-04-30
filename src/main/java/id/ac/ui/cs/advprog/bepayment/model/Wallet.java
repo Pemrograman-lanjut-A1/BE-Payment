@@ -1,30 +1,30 @@
 package id.ac.ui.cs.advprog.bepayment.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Builder
+import java.util.UUID;
+
 @Getter
+@Setter
+@NoArgsConstructor
+@Builder
+@Entity(name = "wallet")
 public class Wallet {
-    String id;
-    String userId;
-    @Setter
-    Integer amount;
+    @Id
+    private String id;
+    private String userId;
+    private double amount;
 
-
-
-    public void addAmount(int amount){
-        this.amount += amount;
-    }
-
-    public void subtractAmount(int amount) {
-        if (amount > this.amount) {
-            this.amount = 0;
-        } else {
-            this.amount -= amount;
-        }
+    public Wallet(String id, String userId, double amount) {
+        this.id = id;
+        this.userId = userId;
+        this.amount = amount;
     }
 }
-
-
