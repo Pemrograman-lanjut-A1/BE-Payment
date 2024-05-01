@@ -12,6 +12,6 @@ public interface TopUpRepository {
     public boolean confirmTopUp(String topUpId);
     public TopUp findById(String id);
     public List<TopUp> findAll();
-
     public List<TopUp> findAllWaiting();
+    public List<TopUp> findAllByUserId(String userId);
 }

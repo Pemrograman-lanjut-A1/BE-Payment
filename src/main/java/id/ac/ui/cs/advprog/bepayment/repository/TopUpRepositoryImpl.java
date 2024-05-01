@@ -89,4 +89,11 @@ public class TopUpRepositoryImpl implements TopUpRepository {
                 .setParameter("WAITING_APPROVAL", TopUpStatus.WAITING_APPROVAL)
                 .getResultList();
     }
+    @Override
+    @Transactional
+    public List<TopUp> findAllByUserId(String userId){
+        return entityManager.createQuery("SELECT t FROM topup t WHERE t.userId = :userId", TopUp.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
 }
