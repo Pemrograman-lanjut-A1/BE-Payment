@@ -14,4 +14,6 @@ public interface TopUpService {
     public boolean confirmTopUp(String topUpId);
     public TopUp findById(String topUpId);
     public List<TopUp> findAll();
+
+    public List<TopUp> findAllWaiting();
 }

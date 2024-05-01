@@ -107,4 +107,9 @@ public class TopUpServiceImpl implements TopUpService {
     public List<TopUp> findAll() {
         return topUpRepository.findAll();
     }
+
+    @Override
+    public List<TopUp> findAllWaiting(){
+        return topUpRepository.findAllWaiting();
+    }
 }
