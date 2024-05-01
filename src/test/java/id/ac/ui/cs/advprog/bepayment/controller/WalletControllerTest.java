@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,5 +86,32 @@ public class WalletControllerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertTrue(responseEntity.getBody().toString().contains("Something Wrong With Server"));
+    }
+
+    @Test
+    public void testGetWalletByUserIdSuccess() {
+        String userId = "123";
+        Wallet expectedWallet = new Wallet();
+        when(walletService.findByUserId(userId)).thenReturn(expectedWallet);
+
+        ResponseEntity<?> responseEntity = walletController.getWalletByUserId(userId);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(expectedWallet, responseEntity.getBody());
+    }
+
+    @Test
+    public void testGetWalletByUserIdInternalServerError() {
+        String userId = "789";
+        when(walletService.findByUserId(userId)).thenThrow(new RuntimeException("Internal Server Error"));
+
+        ResponseEntity<?> responseEntity = walletController.getWalletByUserId(userId);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        Map<String, Object> expectedResponse = new HashMap<>();
+        expectedResponse.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        expectedResponse.put("error", "Internal Server Error");
+        expectedResponse.put("message", "Something Wrong With Server");
+        assertEquals(expectedResponse, responseEntity.getBody());
     }
 }
