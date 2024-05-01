@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -208,4 +209,51 @@ public class TopUpServiceTest {
 
         verify(topUpRepository, times(1)).deleteAll();
     }
+
+    @Test
+    void testFindAllByUserIdReturnsListOfTopUps() {
+        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+        List<TopUp> expectedTopUps = new ArrayList<>();
+        expectedTopUps.add(new TopUp());
+        expectedTopUps.add(new TopUp());
+        expectedTopUps.add(new TopUp());
+        when(topUpRepository.findAll()).thenReturn(expectedTopUps);
+
+        List<TopUp> foundTopUps = topUpService.findAllByUserId(userId);
+
+        assertNotNull(foundTopUps);
+        assertEquals(expectedTopUps.size(), foundTopUps.size());
+    }
+
+    @Test
+    void testFindAllByUserIdMultipleTopUpsForUser() {
+        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+        List<TopUp> expectedTopUps = new ArrayList<>();
+        expectedTopUps.add(new TopUpBuilder().userId(userId).wallet(wallet).amount(2000).build());
+        expectedTopUps.add(new TopUpBuilder().userId(userId).wallet(wallet).amount(3000).build());
+        expectedTopUps.add(new TopUpBuilder().userId(userId).wallet(wallet).amount(4000).build());
+        when(topUpRepository.findAll()).thenReturn(expectedTopUps);
+
+        List<TopUp> foundTopUps = topUpService.findAllByUserId(userId);
+
+        assertNotNull(foundTopUps);
+        assertEquals(expectedTopUps.size(), foundTopUps.size());
+        for (TopUp topUp : foundTopUps) {
+            assertEquals(userId, topUp.getUserId());
+        }
+    }
+
+
+    @Test
+    void testFindAllByUserIdNoTopUpsFound() {
+        String userId = "non-existing-user-id";
+        when(topUpRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<TopUp> foundTopUps = topUpService.findAllByUserId(userId);
+
+        assertNotNull(foundTopUps);
+        assertEquals(0, foundTopUps.size());
+    }
+
+
 }
