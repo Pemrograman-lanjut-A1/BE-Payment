@@ -166,5 +166,18 @@ public class TopUpController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+    @GetMapping("/all/{userId}")
+    public ResponseEntity<?> getTopUpByUserId(@PathVariable("userId") String userId){
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<TopUp> topUps = topUpService.findAllByUserId(userId);
+            return ResponseEntity.ok(topUps);
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
 }
