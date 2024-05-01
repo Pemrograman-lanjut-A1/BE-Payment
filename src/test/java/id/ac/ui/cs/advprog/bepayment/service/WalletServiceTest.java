@@ -100,4 +100,30 @@ public class WalletServiceTest {
             assertEquals("Failed to add amount", e.getMessage());
         }
     }
+
+    @Test
+    public void testFindByUserId() {
+        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+
+        when(walletRepository.findByUserId(userId)).thenReturn(wallet);
+
+        Wallet foundWallet = walletService.findByUserId(userId);
+
+        verify(walletRepository).findByUserId(userId);
+        assertNotNull(foundWallet);
+        assertEquals(wallet, foundWallet);
+    }
+
+    @Test
+    public void testFindByUserIdWalletNotFound() {
+        String userId = "nonexistentUserId";
+
+        when(walletRepository.findByUserId(userId)).thenReturn(null);
+
+        Wallet foundWallet = walletService.findByUserId(userId);
+
+        verify(walletRepository).findByUserId(userId);
+        assertNull(foundWallet);
+    }
+
 }
