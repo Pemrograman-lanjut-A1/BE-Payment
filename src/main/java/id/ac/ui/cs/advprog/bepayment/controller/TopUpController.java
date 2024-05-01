@@ -134,6 +134,20 @@ public class TopUpController {
         }
     }
 
+    @GetMapping("/waiting")
+    public ResponseEntity<?> getAllWaitingTopUps(){
+        try {
+            List<TopUp> topUps = topUpService.findAllWaiting();
+            return ResponseEntity.ok(topUps);
+        }catch (Exception e){
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
     @GetMapping("/{topUpId}")
     public ResponseEntity<?> getTopUpById(@PathVariable("topUpId") String topUpId){
         Map<String, Object> response = new HashMap<>();
