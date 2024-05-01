@@ -116,4 +116,10 @@ public class TopUpServiceImpl implements TopUpService {
     public List<TopUp> findAllWaiting(){
         return topUpRepository.findAllWaiting();
     }
+
+    @Override
+    @Transactional
+    public List<TopUp> findAllByUserId(String userId) {
+        return topUpRepository.findAll();
+    }
 }
