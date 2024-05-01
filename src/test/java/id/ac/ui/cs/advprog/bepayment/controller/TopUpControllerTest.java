@@ -106,6 +106,18 @@ public class TopUpControllerTest {
         assertEquals(dummyTopUps, responseEntity.getBody());
     }
 
+    @Test
+    public void testGetAllWaitingTopUpsSuccess() {
+        List<TopUp> dummyTopUps = Arrays.asList(new TopUp());
+
+        when(topUpService.findAllWaiting()).thenReturn(dummyTopUps);
+
+        ResponseEntity<?> responseEntity = topUpController.getAllWaitingTopUps();
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(dummyTopUps, responseEntity.getBody());
+    }
+
 
     @Test
     public void testDeleteAllTopUpInternalServerError() {
@@ -158,6 +170,19 @@ public class TopUpControllerTest {
         Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
         assertNotNull(responseBody.get("error"));
     }
+
+    @Test
+    public void testGetAllWaitingTopUpsInternalServerError() {
+        when(topUpService.findAllWaiting()).thenThrow(new RuntimeException("Internal Server Error"));
+
+        ResponseEntity<?> responseEntity = topUpController.getAllWaitingTopUps();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertInstanceOf(Map.class, responseEntity.getBody());
+        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
+        assertNotNull(responseBody.get("error"));
+    }
+
 
     @Test
     void testConfirmTopUpSuccessful() {
