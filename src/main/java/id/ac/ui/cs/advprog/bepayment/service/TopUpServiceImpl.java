@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.bepayment.service;
 
+import id.ac.ui.cs.advprog.bepayment.enums.TopUpMethod;
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
@@ -14,6 +15,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +38,8 @@ public class TopUpServiceImpl implements TopUpService {
                 .wallet(wallet)
                 .amount(topUpRequest.amount)
                 .status(TopUpStatus.WAITING_APPROVAL)
+                .topUpMethod(TopUpMethod.valueOf(topUpRequest.topUpMethod))
+                .dateAdded(new Date())
                 .build();
 
         return topUpRepository.save(topUp);

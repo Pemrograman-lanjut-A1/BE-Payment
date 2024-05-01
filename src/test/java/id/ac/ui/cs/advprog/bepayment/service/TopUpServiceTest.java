@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.bepayment.service;
 
+import id.ac.ui.cs.advprog.bepayment.enums.TopUpMethod;
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
@@ -50,33 +51,31 @@ public class TopUpServiceTest {
         topUpBuilder = new TopUpBuilder()
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
                 .amount(500)
-                .wallet(wallet);
+                .wallet(wallet)
+                .topUpMethod(TopUpMethod.E_WALLET);
         topUp = topUpBuilder.build();
     }
 
     @Test
     void createTopUpValidTopUpRequestReturnsTopUp() {
-        String topUpId = "123";
-        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        String walletId = "1";
-        double amount = 100.0;
         TopUpRequest topUpRequest = new TopUpRequest();
-        topUpRequest.userId = userId;
-        topUpRequest.walletId = walletId;
-        topUpRequest.amount = amount;
+        topUpRequest.userId = topUp.getUserId();
+        topUpRequest.walletId = topUp.getWallet().getId();
+        topUpRequest.amount = topUp.getAmount();
+        topUpRequest.topUpMethod = topUp.getTopUpMethod().getValue();
+
 
         when(walletRepository.findById(anyString())).thenReturn(wallet);
-
-        when(topUpRepository.save(any(TopUp.class))).thenReturn(new TopUp(topUpId, userId, wallet, amount, TopUpStatus.WAITING_APPROVAL));
+        when(topUpRepository.save(any(TopUp.class))).thenReturn(topUp);
 
         TopUp createdTopUp = topUpService.createTopUp(topUpRequest);
 
-
         assertNotNull(createdTopUp);
-        assertEquals(topUpId, createdTopUp.getId());
-        assertEquals(userId, createdTopUp.getUserId());
-        assertEquals(amount, createdTopUp.getAmount());
-        assertEquals(TopUpStatus.WAITING_APPROVAL, createdTopUp.getStatus());
+        assertEquals(topUp.getId(), createdTopUp.getId());
+        assertEquals(topUp.getUserId(), createdTopUp.getUserId());
+        assertEquals(topUp.getAmount(), createdTopUp.getAmount());
+        assertEquals(topUp.getStatus(), createdTopUp.getStatus());
+        assertEquals(topUp.getTopUpMethod(), createdTopUp.getTopUpMethod());
     }
 
     @Test
