@@ -189,6 +189,21 @@ public class TopUpServiceTest {
     }
 
     @Test
+    void findAllWaitingReturnsListOfTopUps() {
+        List<TopUp> expectedTopUps = new ArrayList<>();
+        expectedTopUps.add(new TopUp());
+        expectedTopUps.add(new TopUp());
+        expectedTopUps.add(new TopUp());
+        when(topUpRepository.findAllWaiting()).thenReturn(expectedTopUps);
+
+        List<TopUp> foundTopUps = topUpService.findAllWaiting();
+
+        assertNotNull(foundTopUps);
+        assertEquals(expectedTopUps.size(), foundTopUps.size());
+        assertEquals(expectedTopUps, foundTopUps);
+    }
+
+    @Test
     void deleteAllTopUpCallsRepositoryDeleteAll() {
         topUpService.deleteAllTopUp();
 
