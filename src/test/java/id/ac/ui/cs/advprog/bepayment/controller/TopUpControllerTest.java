@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -250,5 +251,29 @@ public class TopUpControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertTrue(responseEntity.getBody().toString().contains("Something Wrong With Server"));
     }
+
+    @Test
+    void testGetTopUpByUserIdSuccess() {
+        String userId = "valid-user-id";
+        List<TopUp> dummyTopUps = Arrays.asList(new TopUp(), new TopUp());
+        when(topUpService.findAllByUserId(userId)).thenReturn(dummyTopUps);
+
+        ResponseEntity<?> responseEntity = topUpController.getTopUpByUserId(userId);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(dummyTopUps, responseEntity.getBody());
+    }
+
+    @Test
+    void testGetTopUpByUserIdInternalServerError() {
+        String userId = "valid-user-id";
+        when(topUpService.findAllByUserId(userId)).thenThrow(new RuntimeException("Internal Server Error"));
+
+        ResponseEntity<?> responseEntity = topUpController.getTopUpByUserId(userId);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getBody().toString().contains("Something Wrong With Server"));
+    }
+
 
 }
