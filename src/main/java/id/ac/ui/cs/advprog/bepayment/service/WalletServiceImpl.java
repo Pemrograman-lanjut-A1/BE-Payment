@@ -40,4 +40,10 @@ public class WalletServiceImpl implements WalletService{
     public Wallet findById(String walletId) {
         return walletRepository.findById(walletId);
     }
+
+    @Override
+    @Transactional
+    public Wallet findByUserId(String userId) {
+        return walletRepository.findByUserId(userId);
+    }
 }

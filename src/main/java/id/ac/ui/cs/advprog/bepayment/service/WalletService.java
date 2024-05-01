@@ -9,4 +9,5 @@ public interface WalletService {
     public Wallet createWallet(WalletRequest walletRequest);
     public void addAmount(String walletId, double totalAmount);
     public Wallet findById(String walletId);
+    public Wallet findByUserId(String userId);
 }
