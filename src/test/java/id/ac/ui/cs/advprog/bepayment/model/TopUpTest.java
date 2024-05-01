@@ -1,11 +1,14 @@
 package id.ac.ui.cs.advprog.bepayment.model;
 
+import id.ac.ui.cs.advprog.bepayment.enums.TopUpMethod;
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +27,7 @@ class TopUpTest {
         topUpBuilder = new TopUpBuilder()
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
                 .amount(500)
+                .topUpMethod(TopUpMethod.E_WALLET)
                 .wallet(wallet);
         topUp = topUpBuilder.build();
     }
@@ -34,6 +38,7 @@ class TopUpTest {
         assertEquals(wallet, topUp.getWallet());
         assertEquals(500, topUp.getAmount());
         assertEquals(TopUpStatus.WAITING_APPROVAL, topUp.getStatus());
+        assertEquals(TopUpMethod.E_WALLET, topUp.getTopUpMethod());
     }
 
     @Test
@@ -67,5 +72,18 @@ class TopUpTest {
         assertThrows(IllegalArgumentException.class, () -> {
             topUp.setAmount(0);
         });
+    }
+    @Test
+    void testSetTopUpMethod() {
+        TopUpMethod method = TopUpMethod.KARTU_KREDIT;
+        topUp.setTopUpMethod(method);
+        assertEquals(method, topUp.getTopUpMethod());
+    }
+
+    @Test
+    void testSetDateAdded() {
+        Date date = new Date();
+        topUp.setDateAdded(date);
+        assertEquals(date, topUp.getDateAdded());
     }
 }
