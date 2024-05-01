@@ -38,6 +38,7 @@ public class TopUp {
         this.wallet = wallet;
         this.amount = amount;
         this.status = status;
+        this.dateAdded = dateAdded;
         this.topUpMethod = method;
     }
     public void setAmount(double amount) {
