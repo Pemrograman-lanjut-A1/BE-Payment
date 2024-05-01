@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -44,6 +45,20 @@ public class WalletController {
                 response.put("message", "Wallet with ID " + walletId + " not found.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
+            return ResponseEntity.ok(wallet);
+        }catch (Exception e){
+            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+            response.put("message", "Something Wrong With Server");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/{userId}/user")
+    public ResponseEntity<?> getWalletByUserId(@PathVariable("userId") String userId){
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Wallet wallet = walletService.findByUserId(userId);
             return ResponseEntity.ok(wallet);
         }catch (Exception e){
             response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
