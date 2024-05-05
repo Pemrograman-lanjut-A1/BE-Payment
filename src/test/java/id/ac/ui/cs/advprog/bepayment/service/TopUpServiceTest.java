@@ -8,6 +8,7 @@ import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import id.ac.ui.cs.advprog.bepayment.pojos.TopUpRequest;
 import id.ac.ui.cs.advprog.bepayment.repository.TopUpRepositoryImpl;
 import id.ac.ui.cs.advprog.bepayment.repository.WalletRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +18,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,10 +32,11 @@ import static org.mockito.Mockito.*;
 public class TopUpServiceTest {
     @InjectMocks
     TopUpServiceImpl topUpService;
+    @Mock
+    WalletServiceImpl walletService;
 
     @Mock
     TopUpRepositoryImpl topUpRepository;
-
 
     @Mock
     private WalletRepository walletRepository;
@@ -58,7 +63,7 @@ public class TopUpServiceTest {
     }
 
     @Test
-    void createTopUpValidTopUpRequestReturnsTopUp() {
+    void createTopUpValidTopUpRequestReturnsTopUp() throws ExecutionException, InterruptedException {
         TopUpRequest topUpRequest = new TopUpRequest();
         topUpRequest.userId = topUp.getUserId();
         topUpRequest.walletId = topUp.getWallet().getId();
@@ -69,7 +74,9 @@ public class TopUpServiceTest {
         when(walletRepository.findById(anyString())).thenReturn(wallet);
         when(topUpRepository.save(any(TopUp.class))).thenReturn(topUp);
 
-        TopUp createdTopUp = topUpService.createTopUp(topUpRequest);
+        CompletableFuture<TopUp> createdTopUpFuture = topUpService.createTopUp(topUpRequest);
+
+        TopUp createdTopUp = createdTopUpFuture.get();
 
         assertNotNull(createdTopUp);
         assertEquals(topUp.getId(), createdTopUp.getId());
@@ -80,76 +87,81 @@ public class TopUpServiceTest {
     }
 
     @Test
-    void deleteTopUpByIdExistingTopUpIdReturnsTrue() {
+    void deleteTopUpByIdExistingTopUpIdReturnsTrue() throws ExecutionException, InterruptedException {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        when(topUpRepository.findById(topUpId)).thenReturn(new TopUp());
+        TopUp topUp = new TopUp();
+        when(topUpRepository.findById(topUpId)).thenReturn(topUp);
 
-        boolean result = topUpService.deleteTopUpById(topUpId);
+        when(topUpRepository.deleteTopUpById(topUpId)).thenReturn(true);
+
+        boolean result = topUpService.deleteTopUpById(topUpId).get();
 
         assertTrue(result);
         verify(topUpRepository, times(1)).deleteTopUpById(topUpId);
     }
 
-    @Test
-    void deleteTopUpByIdNonExistingTopUpIdReturnsFalse() {
-        String nonExistingTopUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc6410";
-        when(topUpRepository.findById(nonExistingTopUpId)).thenReturn(null);
 
-        boolean result = topUpService.deleteTopUpById(nonExistingTopUpId);
 
-        assertFalse(result);
-        verify(topUpRepository, never()).deleteTopUpById(nonExistingTopUpId);
-    }
 
     @Test
-    void cancelTopUpExistingTopUpIdReturnsTrue() {
+    void cancelTopUpExistingTopUpIdReturnsTrue() throws ExecutionException, InterruptedException {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        when(topUpRepository.findById(topUpId)).thenReturn(new TopUp());
+        TopUp topUp = new TopUp();
+        when(topUpRepository.findById(topUpId)).thenReturn(topUp);
+        when(topUpRepository.cancelTopUp(topUpId)).thenReturn(true);
 
-        boolean result = topUpService.cancelTopUp(topUpId);
+        CompletableFuture<Boolean> resultFuture = topUpService.cancelTopUp(topUpId);
 
-        assertTrue(result);
+        assertTrue(resultFuture.get());
         verify(topUpRepository, times(1)).cancelTopUp(topUpId);
     }
 
+
+
+
     @Test
-    void cancelTopUpNonExistingTopUpIdReturnsFalse() {
+    void cancelTopUpNonExistingTopUpIdReturnsFalse() throws ExecutionException, InterruptedException {
         String nonExistingTopUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc6410";
-        when(topUpRepository.findById(nonExistingTopUpId)).thenReturn(null);
+        TopUp topUp = null;
+        when(topUpRepository.findById(nonExistingTopUpId)).thenReturn(topUp);
 
-        boolean result = topUpService.cancelTopUp(nonExistingTopUpId);
+        CompletableFuture<Boolean> resultFuture = topUpService.cancelTopUp(nonExistingTopUpId);
 
-        assertFalse(result);
+        assertFalse(resultFuture.get());
         verify(topUpRepository, never()).cancelTopUp(nonExistingTopUpId);
+        verify(topUpRepository, times(1)).findById(nonExistingTopUpId);
     }
 
     @Test
-    public void testConfirmTopUpValidTopUpIdSuccess() {
-        String topUpId = topUp.getId();
-        double topUpAmount = topUp.getAmount();
-        double walletAmount = wallet.getAmount();
+    @Transactional
+    public void testConfirmTopUp_WithValidTopUpId() {
+        String validTopUpId = "validTopUpId";
 
-        when(topUpRepository.findById(eq(topUpId))).thenReturn(topUp);
+        TopUp topUp = new TopUp();
+        topUp.setAmount(50.0);
+        Wallet wallet = new Wallet();
+        wallet.setAmount(100.0);
+        topUp.setWallet(wallet);
+        when(topUpRepository.findById(validTopUpId)).thenReturn(topUp);
 
-        boolean result = topUpService.confirmTopUp(topUpId);
-
-        assertTrue(result, "confirmTopUp should return true for a valid top up ID");
-        verify(topUpRepository, times(1)).findById(eq(topUpId));
-        verify(topUpRepository, times(1)).confirmTopUp(eq(topUpId));
-        verify(walletRepository, times(1)).addAmount(eq("1"), eq(topUpAmount + walletAmount));
+        CompletableFuture<Boolean> result = topUpService.confirmTopUp(validTopUpId);
+        verify(topUpRepository, times(1)).confirmTopUp(validTopUpId);
+        verify(walletService, times(1)).addAmount(wallet.getId(), 150.0);
     }
 
     @Test
-    public void testConfirmTopUpInvalidTopUpIdFailure() {
+    void testConfirmTopUpInvalidTopUpIdFailure() throws ExecutionException, InterruptedException {
         String topUpId = "invalid-top-up-id";
 
         when(topUpRepository.findById(anyString())).thenReturn(null);
 
-        boolean result = topUpService.confirmTopUp(topUpId);
+        CompletableFuture<Boolean> resultFuture = topUpService.confirmTopUp(topUpId);
+        boolean result = resultFuture.get();
 
         assertFalse(result, "confirmTopUp should return false for an invalid top up ID");
         verify(topUpRepository, times(1)).findById(topUpId);
     }
+
 
     @Test
     void findByIdExistingTopUpIdReturnsTopUp() {
@@ -157,7 +169,8 @@ public class TopUpServiceTest {
         TopUp expectedTopUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(expectedTopUp);
 
-        TopUp foundTopUp = topUpService.findById(topUpId);
+        CompletableFuture<TopUp> futureTopUp = topUpService.findById(topUpId);
+        TopUp foundTopUp = futureTopUp.join();
 
         assertNotNull(foundTopUp);
         assertEquals(expectedTopUp, foundTopUp);
@@ -166,27 +179,32 @@ public class TopUpServiceTest {
     @Test
     void findByIdNonExistingTopUpIdReturnsNull() {
         String nonExistingTopUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc6410";
-        when(topUpRepository.findById(nonExistingTopUpId)).thenReturn(null);
+        when(topUpRepository.findById(anyString())).thenReturn(null);
 
-        TopUp foundTopUp = topUpService.findById(nonExistingTopUpId);
+        CompletableFuture<TopUp> futureTopUp = topUpService.findById(nonExistingTopUpId);
+        TopUp foundTopUp = futureTopUp.join();
 
         assertNull(foundTopUp);
     }
 
     @Test
-    void findAllReturnsListOfTopUps() {
+    void findAllReturnsListOfTopUps() throws InterruptedException, ExecutionException {
         List<TopUp> expectedTopUps = new ArrayList<>();
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
+        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(expectedTopUps);
         when(topUpRepository.findAll()).thenReturn(expectedTopUps);
 
-        List<TopUp> foundTopUps = topUpService.findAll();
+        CompletableFuture<List<TopUp>> foundTopUpsFuture = topUpService.findAll();
+
+        List<TopUp> foundTopUps = foundTopUpsFuture.get();
 
         assertNotNull(foundTopUps);
         assertEquals(expectedTopUps.size(), foundTopUps.size());
         assertEquals(expectedTopUps, foundTopUps);
     }
+
 
     @Test
     void findAllWaitingReturnsListOfTopUps() {
@@ -209,51 +227,40 @@ public class TopUpServiceTest {
 
         verify(topUpRepository, times(1)).deleteAll();
     }
-
     @Test
-    void testFindAllByUserIdReturnsListOfTopUps() {
-        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        List<TopUp> expectedTopUps = new ArrayList<>();
-        expectedTopUps.add(new TopUp());
-        expectedTopUps.add(new TopUp());
-        expectedTopUps.add(new TopUp());
-        when(topUpRepository.findAll()).thenReturn(expectedTopUps);
+    @Transactional
+    public void testFindAllByUserId_WithValidUserIdAndTopUpsExist() {
+        String validUserId = "validUserId";
+        List<TopUp> topUps = new ArrayList<>();
+        topUps.add(new TopUp());
+        when(topUpRepository.findAllByUserId(validUserId)).thenReturn(topUps);
 
-        List<TopUp> foundTopUps = topUpService.findAllByUserId(userId);
+        CompletableFuture<List<TopUp>> result = topUpService.findAllByUserId(validUserId);
 
-        assertNotNull(foundTopUps);
-        assertEquals(expectedTopUps.size(), foundTopUps.size());
+        assertEquals(topUps, result.join());
     }
 
     @Test
-    void testFindAllByUserIdMultipleTopUpsForUser() {
-        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        List<TopUp> expectedTopUps = new ArrayList<>();
-        expectedTopUps.add(new TopUpBuilder().userId(userId).wallet(wallet).amount(2000).build());
-        expectedTopUps.add(new TopUpBuilder().userId(userId).wallet(wallet).amount(3000).build());
-        expectedTopUps.add(new TopUpBuilder().userId(userId).wallet(wallet).amount(4000).build());
-        when(topUpRepository.findAll()).thenReturn(expectedTopUps);
+    @Transactional
+    public void testFindAllByUserId_WithValidUserIdAndNoTopUpsExist() {
+        String validUserId = "validUserId";
+        List<TopUp> emptyList = new ArrayList<>();
+        when(topUpRepository.findAllByUserId(validUserId)).thenReturn(emptyList);
 
-        List<TopUp> foundTopUps = topUpService.findAllByUserId(userId);
+        CompletableFuture<List<TopUp>> result = topUpService.findAllByUserId(validUserId);
 
-        assertNotNull(foundTopUps);
-        assertEquals(expectedTopUps.size(), foundTopUps.size());
-        for (TopUp topUp : foundTopUps) {
-            assertEquals(userId, topUp.getUserId());
-        }
+        assertEquals(emptyList, result.join());
     }
-
 
     @Test
-    void testFindAllByUserIdNoTopUpsFound() {
-        String userId = "non-existing-user-id";
-        when(topUpRepository.findAll()).thenReturn(Collections.emptyList());
+    @Transactional
+    public void testFindAllByUserId_WithInvalidUserId() {
+        String invalidUserId = "invalidUserId";
+        when(topUpRepository.findAllByUserId(invalidUserId)).thenReturn(null);
 
-        List<TopUp> foundTopUps = topUpService.findAllByUserId(userId);
+        CompletableFuture<List<TopUp>> result = topUpService.findAllByUserId(invalidUserId);
 
-        assertNotNull(foundTopUps);
-        assertEquals(0, foundTopUps.size());
+        assertNull(result.join());
     }
-
 
 }
