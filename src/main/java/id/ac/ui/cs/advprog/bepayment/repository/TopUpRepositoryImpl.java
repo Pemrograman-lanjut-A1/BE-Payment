@@ -81,4 +81,19 @@ public class TopUpRepositoryImpl implements TopUpRepository {
         return entityManager.createQuery("SELECT t FROM topup t", TopUp.class)
                 .getResultList();
     }
+
+    @Override
+    @Transactional
+    public List<TopUp> findAllWaiting() {
+        return entityManager.createQuery("SELECT t FROM topup t WHERE t.status = :WAITING_APPROVAL", TopUp.class)
+                .setParameter("WAITING_APPROVAL", TopUpStatus.WAITING_APPROVAL)
+                .getResultList();
+    }
+    @Override
+    @Transactional
+    public List<TopUp> findAllByUserId(String userId){
+        return entityManager.createQuery("SELECT t FROM topup t WHERE t.userId = :userId", TopUp.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
 }

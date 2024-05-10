@@ -115,7 +115,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testDeleteTopUpByIdIfIdNotFound(){
+    public void testDeleteTopUpByIdIfIdNotFound() {
         String topUpIdFalse = topUp.getId() + "a";
         assertThrows(NullPointerException.class, () -> topUpRepository.deleteTopUpById(topUpIdFalse));
     }
@@ -174,7 +174,6 @@ public class TopUpRepositoryTest {
     }
 
 
-
     @Test
     public void testFindById() {
         TopUp expectedTopUp = new TopUp();
@@ -208,6 +207,23 @@ public class TopUpRepositoryTest {
     }
 
     @Test
+    public void testFindAllWaiting() {
+
+        TypedQuery typedQuery = mock(TypedQuery.class);
+        when(typedQuery.setParameter(eq("WAITING_APPROVAL"), any())).thenReturn(typedQuery);
+        when(typedQuery.executeUpdate()).thenReturn(1);
+        List<TopUp> expectedTopUps = Collections.emptyList();
+        when(entityManager.createQuery(anyString(), eq(TopUp.class))).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(expectedTopUps);
+
+        List<TopUp> foundTopUps = topUpRepository.findAllWaiting();
+
+        assertEquals(expectedTopUps, foundTopUps);
+        verify(entityManager, times(1)).createQuery(anyString(), eq(TopUp.class));
+        verify(typedQuery, times(1)).getResultList();
+    }
+
+    @Test
     public void testFindAllEmptyResult() {
         List<TopUp> expectedTopUps = Collections.emptyList();
         TypedQuery<TopUp> typedQuery = mock(TypedQuery.class);
@@ -220,5 +236,46 @@ public class TopUpRepositoryTest {
         verify(entityManager, times(1)).createQuery(anyString(), eq(TopUp.class));
         verify(typedQuery, times(1)).getResultList();
     }
+
+    @Test
+    void testFindAllByUserIdReturnsListOfTopUps() {
+        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+        TypedQuery typedQuery = mock(TypedQuery.class);
+        List<TopUp> expectedTopUps = new ArrayList<>();
+        expectedTopUps.add(new TopUp());
+        expectedTopUps.add(new TopUp());
+        expectedTopUps.add(new TopUp());
+
+        when(entityManager.createQuery(anyString(), eq(TopUp.class))).thenReturn(typedQuery);
+        when(typedQuery.setParameter("userId", userId)).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(expectedTopUps);
+
+        List<TopUp> topUps = topUpRepository.findAllByUserId(userId);
+
+        assertEquals(3, topUps.size());
+        verify(entityManager, times(1)).createQuery(anyString(), eq(TopUp.class));
+        verify(typedQuery, times(1)).setParameter("userId", userId);
+        verify(typedQuery, times(1)).getResultList();
+    }
+
+    @Test
+    void testFindAllByUserIdReturnsEmptyListForNonExistingUser() {
+        String nonExistingUserId = "non-existing-user-id";
+        TypedQuery typedQuery = mock(TypedQuery.class);
+
+        when(entityManager.createQuery(anyString(), eq(TopUp.class))).thenReturn(typedQuery);
+        when(typedQuery.setParameter("userId", nonExistingUserId)).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(Collections.emptyList());
+
+        List<TopUp> topUps = topUpRepository.findAllByUserId(nonExistingUserId);
+
+        assertNotNull(topUps);
+        assertEquals(0, topUps.size());
+        verify(entityManager, times(1)).createQuery(anyString(), eq(TopUp.class));
+        verify(typedQuery, times(1)).setParameter("userId", nonExistingUserId);
+        verify(typedQuery, times(1)).getResultList();
+    }
+
 }
+
 

@@ -4,11 +4,15 @@ package id.ac.ui.cs.advprog.bepayment.repository;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -103,5 +107,40 @@ public class WalletRepositoryTest {
 
         assertEquals(500, wallet.getAmount());
     }
+
+    @Test
+    public void testFindByUserId() {
+        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+        List<Wallet> wallets = new ArrayList<>();
+        wallets.add(wallet);
+
+        TypedQuery<Wallet> query = mock(TypedQuery.class);
+
+        when(entityManager.createQuery(anyString(), eq(Wallet.class))).thenReturn(query);
+        when(query.setParameter("userId", userId)).thenReturn(query);
+        when(query.getResultList()).thenReturn(wallets);
+
+        Wallet foundWallet = walletRepository.findByUserId(userId);
+
+        assertEquals(wallet, foundWallet);
+    }
+
+
+    @Test
+    public void testFindByUserIdNotFound() {
+        String userId = "nonexistentUserId";
+        List<Wallet> wallets = new ArrayList<>();
+
+        TypedQuery<Wallet> query = mock(TypedQuery.class);
+
+        when(entityManager.createQuery(anyString(), eq(Wallet.class))).thenReturn(query);
+        when(query.setParameter("userId", userId)).thenReturn(query);
+        when(query.getResultList()).thenReturn(wallets);
+
+        Wallet foundWallet = walletRepository.findByUserId(userId);
+
+        assertNull(foundWallet);
+    }
+
 
 }

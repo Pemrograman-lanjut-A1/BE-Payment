@@ -12,7 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,35 +33,46 @@ public class WalletControllerTest {
         WalletRequest walletRequest = new WalletRequest();
         Wallet createdWallet = new Wallet();
 
-        when(walletService.createWallet(walletRequest)).thenReturn(createdWallet);
+        when(walletService.createWallet(walletRequest)).thenReturn(CompletableFuture.completedFuture(createdWallet));
 
-        ResponseEntity<?> responseEntity = walletController.createWallet(walletRequest);
+        CompletableFuture<ResponseEntity<Map<String, Object>>> responseEntityFuture = walletController.createWallet(walletRequest);
+
+        ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-        assertInstanceOf(Map.class, responseEntity.getBody());
+        assertNotNull(responseEntity.getBody());
+        assertTrue(responseEntity.getBody() instanceof Map);
         Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
         assertNotNull(responseBody.get("wallet"));
     }
 
     @Test
     public void testCreateWallet_InternalServerError() {
-        when(walletService.createWallet(any())).thenThrow(new RuntimeException("Internal Server Error"));
+        when(walletService.createWallet(any())).thenReturn(CompletableFuture.supplyAsync(() -> {
+            throw new RuntimeException("Internal Server Error");
+        }));
 
-        ResponseEntity<?> responseEntity = walletController.createWallet(new WalletRequest());
+        CompletableFuture<ResponseEntity<Map<String, Object>>> responseEntityFuture = walletController.createWallet(new WalletRequest());
+        ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertInstanceOf(Map.class, responseEntity.getBody());
+        assertNotNull(responseEntity.getBody());
+        assertTrue(responseEntity.getBody() instanceof Map);
         Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
         assertNotNull(responseBody.get("error"));
     }
+
 
     @Test
     void testGetTopUpByIdSuccessful() {
         String walletId = "123";
         Wallet expectedWallet = new Wallet();
-        when(walletService.findById(walletId)).thenReturn(expectedWallet);
 
-        ResponseEntity<?> responseEntity = walletController.getTopUpById(walletId);
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(expectedWallet));
+
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getTopUpById(walletId);
+
+        ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(expectedWallet, responseEntity.getBody());
@@ -68,22 +81,68 @@ public class WalletControllerTest {
     @Test
     void testGetTopUpByIdTopUpNotFound() {
         String walletId = "789";
-        when(walletService.findById(walletId)).thenReturn(null);
 
-        ResponseEntity<?> responseEntity = walletController.getTopUpById(walletId);
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
+
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getTopUpById(walletId);
+
+        ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertTrue(responseEntity.getBody().toString().contains("Wallet with ID " + walletId + " not found"));
     }
 
+
     @Test
     void testGetTopUpByIdInternalServerError() {
         String walletId = "456";
-        when(walletService.findById(walletId)).thenThrow(new RuntimeException("Internal Server Error"));
 
-        ResponseEntity<?> responseEntity = walletController.getTopUpById(walletId);
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
+
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getTopUpById(walletId);
+
+        ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertTrue(responseEntity.getBody().toString().contains("Something Wrong With Server"));
     }
+
+    @Test
+    public void testGetWalletByUserIdSuccess() {
+        String userId = "123";
+        Wallet expectedWallet = new Wallet();
+
+        when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.completedFuture(expectedWallet));
+
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletByUserId(userId);
+
+        ResponseEntity<?> responseEntity = responseEntityFuture.join();
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(expectedWallet, responseEntity.getBody());
+    }
+
+    @Test
+    public void testGetWalletByUserIdInternalServerError() {
+        String userId = "789";
+
+        when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
+
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletByUserId(userId);
+
+        ResponseEntity<?> responseEntity = responseEntityFuture.join();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+
+        Map<String, Object> expectedResponseBody = new HashMap<>();
+        expectedResponseBody.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        expectedResponseBody.put("error", "Internal Server Error");
+        expectedResponseBody.put("message", "Something Wrong With Server");
+
+        Map<String, Object> actualResponseBody = (Map<String, Object>) responseEntity.getBody();
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+
 }

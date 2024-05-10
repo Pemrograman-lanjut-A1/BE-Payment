@@ -8,9 +8,11 @@ import id.ac.ui.cs.advprog.bepayment.pojos.WalletRequest;
 import id.ac.ui.cs.advprog.bepayment.repository.WalletRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class WalletServiceImpl implements WalletService{
@@ -18,26 +20,37 @@ public class WalletServiceImpl implements WalletService{
     private WalletRepository walletRepository;
 
     @Override
+    @Async
     @Transactional
-    public Wallet createWallet(WalletRequest walletRequest) {
+    public CompletableFuture<Wallet> createWallet(WalletRequest walletRequest) {
         String walletId = String.valueOf(UUID.randomUUID());
         Wallet wallet = Wallet.builder()
                 .id(walletId)
                 .userId(walletRequest.userId)
                 .amount(0)
                 .build();
-        return walletRepository.save(wallet);
+        return CompletableFuture.completedFuture(walletRepository.save(wallet));
     }
 
     @Override
+    @Async
     @Transactional
-    public void addAmount(String walletId, double totalAmount) {
+    public CompletableFuture<Void> addAmount(String walletId, double totalAmount) {
         walletRepository.addAmount(walletId, totalAmount);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
+    @Async
     @Transactional
-    public Wallet findById(String walletId) {
-        return walletRepository.findById(walletId);
+    public CompletableFuture<Wallet> findById(String walletId) {
+        return CompletableFuture.completedFuture(walletRepository.findById(walletId));
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Wallet> findByUserId(String userId) {
+        return CompletableFuture.completedFuture(walletRepository.findByUserId(userId));
     }
 }

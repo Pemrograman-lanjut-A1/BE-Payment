@@ -12,6 +12,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +46,7 @@ public class WalletServiceTest {
 
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
 
-        Wallet createdWallet = walletService.createWallet(walletRequest);
+        Wallet createdWallet = walletService.createWallet(walletRequest).join();
 
         verify(walletRepository).save(any(Wallet.class));
         assertNotNull(createdWallet);
@@ -53,27 +55,37 @@ public class WalletServiceTest {
         assertEquals(500, createdWallet.getAmount());
     }
 
+
+
     @Test
-    public void testFindById() {
+    public void testFindById() throws ExecutionException, InterruptedException {
+        Wallet wallet = new Wallet();
+        wallet.setId("1");
+
         when(walletRepository.findById("1")).thenReturn(wallet);
 
-        Wallet foundWallet = walletService.findById("1");
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findById("1");
+
+        Wallet foundWallet = foundWalletFuture.get();
 
         verify(walletRepository).findById("1");
         assertNotNull(foundWallet);
         assertEquals(wallet, foundWallet);
     }
 
+
     @Test
     public void testFindByIdWalletNotFound() {
         when(walletRepository.findById("2")).thenReturn(null);
 
-        Wallet foundWallet = walletService.findById("2");
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findById("2");
+
+        Wallet foundWallet = foundWalletFuture.join();
 
         verify(walletRepository).findById("2");
-
         assertNull(foundWallet);
     }
+
 
     @Test
     public void testAddAmountDelegatesCorrectly() {
@@ -100,4 +112,37 @@ public class WalletServiceTest {
             assertEquals("Failed to add amount", e.getMessage());
         }
     }
+
+    @Test
+    public void testFindByUserId() {
+        String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+
+        when(walletRepository.findByUserId(userId)).thenReturn(wallet);
+
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findByUserId(userId);
+
+        Wallet foundWallet = foundWalletFuture.join();
+
+        verify(walletRepository).findByUserId(userId);
+        assertNotNull(foundWallet);
+        assertEquals(wallet, foundWallet);
+    }
+
+    @Test
+    public void testFindByUserIdWalletNotFound() {
+        String userId = "nonexistentUserId";
+
+        when(walletRepository.findByUserId(userId)).thenReturn(null);
+
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findByUserId(userId);
+
+        Wallet foundWallet = foundWalletFuture.join();
+
+        verify(walletRepository).findByUserId(userId);
+
+        assertNull(foundWallet);
+    }
+
+
+
 }
