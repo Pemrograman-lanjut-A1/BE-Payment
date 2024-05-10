@@ -70,7 +70,7 @@ public class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(expectedWallet));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getTopUpById(walletId);
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -84,7 +84,7 @@ public class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getTopUpById(walletId);
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -99,7 +99,7 @@ public class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getTopUpById(walletId);
+        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
