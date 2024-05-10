@@ -79,7 +79,7 @@ public class WalletRepositoryTest {
 
         when(query.setParameter(anyString(), any())).thenReturn(query);
 
-        walletRepository.addAmount(walletId, totalAmount);
+        walletRepository.setAmount(walletId, totalAmount);
 
         verify(entityManager, times(1))
                 .createQuery("UPDATE wallet w SET w.amount = :totalAmount WHERE w.id = :walletId");
@@ -97,7 +97,7 @@ public class WalletRepositoryTest {
         when(query.setParameter(anyString(), any())).thenReturn(query);
         when(query.executeUpdate()).thenReturn(0);
 
-        walletRepository.addAmount(walletId, totalAmount);
+        walletRepository.setAmount(walletId, totalAmount);
 
         verify(entityManager, times(1))
                 .createQuery("UPDATE wallet w SET w.amount = :totalAmount WHERE w.id = :walletId");

@@ -92,9 +92,9 @@ public class WalletServiceTest {
         String walletId = "1";
         double totalAmount = 1000.0;
 
-        walletRepository.addAmount(walletId, totalAmount);
+        walletRepository.setAmount(walletId, totalAmount);
 
-        verify(walletRepository, times(1)).addAmount(walletId, totalAmount);
+        verify(walletRepository, times(1)).setAmount(walletId, totalAmount);
     }
 
     @Test
@@ -102,13 +102,13 @@ public class WalletServiceTest {
         String walletId = "1";
         double totalAmount = 1000.0;
 
-        doThrow(new RuntimeException("Failed to add amount")).when(walletRepository).addAmount(walletId, totalAmount);
+        doThrow(new RuntimeException("Failed to add amount")).when(walletRepository).setAmount(walletId, totalAmount);
 
         try {
-            walletRepository.addAmount(walletId, totalAmount);
+            walletRepository.setAmount(walletId, totalAmount);
             fail("Expected RuntimeException was not thrown");
         } catch (RuntimeException e) {
-            verify(walletRepository, times(1)).addAmount(walletId, totalAmount);
+            verify(walletRepository, times(1)).setAmount(walletId, totalAmount);
             assertEquals("Failed to add amount", e.getMessage());
         }
     }

@@ -134,7 +134,7 @@ public class TopUpServiceTest {
 
     @Test
     @Transactional
-    public void testConfirmTopUp_WithValidTopUpId() {
+    public void testConfirmTopUp_WithValidTopUpId() throws ExecutionException, InterruptedException {
         String validTopUpId = "validTopUpId";
 
         TopUp topUp = new TopUp();

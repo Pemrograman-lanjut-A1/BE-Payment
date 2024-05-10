@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(path="wallet", produces = "application/json")
@@ -37,7 +38,7 @@ public class WalletController {
     }
 
     @GetMapping("/{walletId}")
-    public CompletableFuture<ResponseEntity<?>> getTopUpById(@PathVariable("walletId") String walletId) {
+    public CompletableFuture<ResponseEntity<?>> getWalletById(@PathVariable("walletId") String walletId) {
         return walletService.findById(walletId)
                 .thenApply(wallet -> {
                     if (wallet == null) {
@@ -77,6 +78,5 @@ public class WalletController {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 });
     }
-
 
 }
