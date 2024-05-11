@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,6 +143,91 @@ public class WalletControllerTest {
         Map<String, Object> actualResponseBody = (Map<String, Object>) responseEntity.getBody();
 
         assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
+    public void testAddAmount_Successful() {
+        String walletId = "1";
+        double amount = 50.0;
+        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+
+        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.addAmount(walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Wallet Amount has been Added", responseEntity.getBody().get("message"));
+        assertEquals(wallet, responseEntity.getBody().get("wallet"));
+    }
+
+    @Test
+    public void testDecreaseAmount_Successful() {
+        String walletId = "1";
+        double amount = 50.0;
+        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+
+        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.decreaseAmount(walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Wallet Amount has been Decreased", responseEntity.getBody().get("message"));
+        assertEquals(wallet, responseEntity.getBody().get("wallet"));
+    }
+
+    @Test
+    public void testAddAmount_WalletNotFound() {
+        String walletId = "1";
+        Double amount = 50.0;
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
+
+        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.addAmount(walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("Wallet with ID " + walletId + " not found.", responseEntity.getBody().get("message"));
+    }
+
+    @Test
+    public void testAddAmount_NegativeAmount() {
+        String walletId = "1";
+        double amount = -50.0;
+        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+
+        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.addAmount(walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("totalAmount cannot be negative", responseEntity.getBody().get("message"));
+    }
+
+
+    @Test
+    public void testDecreaseAmount_WalletNotFound() {
+        String walletId = "1";
+        Double amount = 50.0;
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
+
+        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.decreaseAmount(walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("Wallet with ID " + walletId + " not found.", responseEntity.getBody().get("message"));
+    }
+
+    @Test
+    public void testDecreaseAmount_NegativeAmount() {
+        String walletId = "1";
+        double amount = -50.0;
+
+        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.decreaseAmount(walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("totalAmount cannot be negative", responseEntity.getBody().get("message"));
     }
 
 
