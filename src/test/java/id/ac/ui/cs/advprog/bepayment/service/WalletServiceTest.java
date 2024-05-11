@@ -143,6 +143,32 @@ public class WalletServiceTest {
         assertNull(foundWallet);
     }
 
+    @Test
+    public void testAddAmount() throws InterruptedException, ExecutionException {
+        String walletId = "1";
+        double totalAmountToAdd = 50.0;
+        double expectedFinalAmount = wallet.getAmount() + totalAmountToAdd;
 
+        when(walletService.findById(walletId)).thenAnswer(invocation -> wallet);
+
+        CompletableFuture<Void> result = walletService.addAmount(walletId, totalAmountToAdd);
+        result.join();
+
+        verify(walletRepository).setAmount(walletId, expectedFinalAmount);
+    }
+
+    @Test
+    public void testDecreaseAmount() throws InterruptedException, ExecutionException {
+        String walletId = "1";
+        double totalAmountToDecrease = 50.0;
+        double expectedFinalAmount = wallet.getAmount() - totalAmountToDecrease;
+
+        when(walletService.findById(walletId)).thenAnswer(invocation -> wallet);
+
+        CompletableFuture<Void> result = walletService.decreaseAmount(walletId, totalAmountToDecrease);
+        result.join();
+
+        verify(walletRepository).setAmount(walletId, expectedFinalAmount);
+    }
 
 }

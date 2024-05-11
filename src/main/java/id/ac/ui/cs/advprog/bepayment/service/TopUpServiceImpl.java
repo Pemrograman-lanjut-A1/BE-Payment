@@ -111,9 +111,9 @@ public class TopUpServiceImpl implements TopUpService {
             return future;
         }
         try {
-            double totalAmount = topUp.getAmount() + topUp.getWallet().getAmount();
+            double finalAmount = topUp.getAmount();
             topUpRepository.confirmTopUp(topUpId);
-            walletService.addAmount(topUp.getWallet().getId(), totalAmount);
+            walletService.addAmount(topUp.getWallet().getId(), finalAmount);
             future.complete(true);
         } catch (Exception e) {
             System.err.println("Error in confirmTopUp: " + e.getMessage());
