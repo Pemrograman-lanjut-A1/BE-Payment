@@ -1,9 +1,11 @@
 package id.ac.ui.cs.advprog.bepayment.controller;
 
+import id.ac.ui.cs.advprog.bepayment.config.JwtAuthFilter;
 import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import id.ac.ui.cs.advprog.bepayment.pojos.WalletRequest;
 import id.ac.ui.cs.advprog.bepayment.service.WalletService;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,11 +17,12 @@ import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class WalletControllerTest {
@@ -29,41 +32,40 @@ public class WalletControllerTest {
     @Mock
     private WalletService walletService;
 
+    @Mock
+    private JwtAuthFilter jwtAuthFilter;
+
     @Test
-    public void testCreateWalletSuccess() {
+    void createWalletSuccess() {
         WalletRequest walletRequest = new WalletRequest();
-        Wallet createdWallet = new Wallet();
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
+        when(walletService.createWallet(any())).thenReturn(CompletableFuture.completedFuture(new Wallet()));
 
-        when(walletService.createWallet(walletRequest)).thenReturn(CompletableFuture.completedFuture(createdWallet));
-
-        CompletableFuture<ResponseEntity<Map<String, Object>>> responseEntityFuture = walletController.createWallet(walletRequest);
-
-        ResponseEntity<?> responseEntity = responseEntityFuture.join();
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.createWallet("mockedToken", walletRequest).join();
 
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertTrue(responseEntity.getBody() instanceof Map);
-        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
-        assertNotNull(responseBody.get("wallet"));
+        assertEquals("Wallet Created Successfully", responseEntity.getBody().get("message"));
     }
 
     @Test
-    public void testCreateWallet_InternalServerError() {
-        when(walletService.createWallet(any())).thenReturn(CompletableFuture.supplyAsync(() -> {
-            throw new RuntimeException("Internal Server Error");
-        }));
+    void createWalletExpiredJwtToken() {
+        when(jwtAuthFilter.filterToken(anyString())).thenThrow(ExpiredJwtException.class);
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> responseEntityFuture = walletController.createWallet(new WalletRequest());
-        ResponseEntity<?> responseEntity = responseEntityFuture.join();
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.createWallet("mockedToken", new WalletRequest()).join();
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertTrue(responseEntity.getBody() instanceof Map);
-        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
-        assertNotNull(responseBody.get("error"));
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
     }
 
+    @Test
+    void createWalletInternalServerError() {
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
+        when(walletService.createWallet(any())).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Some error occurred")));
 
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.createWallet("mockedToken", new WalletRequest()).join();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Something Wrong With Server", responseEntity.getBody().get("message"));
+    }
     @Test
     void testGetTopUpByIdSuccessful() {
         String walletId = "123";
@@ -146,89 +148,172 @@ public class WalletControllerTest {
     }
 
     @Test
-    public void testAddAmount_Successful() {
-        String walletId = "1";
-        double amount = 50.0;
-        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
-        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+    void addAmountSuccess() throws ExecutionException, InterruptedException {
+        String walletId = "mockedWalletId";
+        double amount = 100.0;
+        Wallet wallet = new Wallet();
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.addAmount(walletId, amount);
-        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+        when(walletService.addAmount(walletId, amount)).thenReturn(CompletableFuture.completedFuture(null));
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", walletId, amount).join();
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("Wallet Amount has been Added", responseEntity.getBody().get("message"));
-        assertEquals(wallet, responseEntity.getBody().get("wallet"));
     }
 
     @Test
-    public void testDecreaseAmount_Successful() {
-        String walletId = "1";
-        double amount = 50.0;
-        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
+    void addAmountWalletNotFound() {
+        String walletId = "mockedWalletId";
+        Double amount = 100.0;
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", walletId, amount).join();
+
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("Wallet with ID mockedWalletId not found.", responseEntity.getBody().get("message"));
+    }
+
+    @Test
+    void addAmountNegativeAmount() {
+        String walletId = "mockedWalletId";
+        double amount = -100.0;
+        Wallet wallet = new Wallet();
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.decreaseAmount(walletId, amount);
-        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", walletId, amount).join();
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("totalAmount cannot be negative", responseEntity.getBody().get("message"));
+    }
+
+    @Test
+    void addAmountInternalServerError() throws ExecutionException, InterruptedException {
+        String walletId = "mockedWalletId";
+        Double amount = 100.0;
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(new Wallet()));
+        doThrow(new RuntimeException("Some error occurred")).when(walletService).addAmount(walletId, amount);
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", walletId, amount).join();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Something went wrong on the server side", responseEntity.getBody().get("message"));
+    }
+
+    @Test
+    void addAmountExpiredJwtToken() {
+        when(jwtAuthFilter.filterToken(anyString())).thenThrow(ExpiredJwtException.class);
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", "mockedWalletId", 100.0).join();
+
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void addAmountEmptyJwtToken() {
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn(null);
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", "mockedWalletId", 100.0).join();
+
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+        assertEquals("Login First", responseEntity.getBody().get("message"));
+    }
+
+
+    @Test
+    void decreaseAmountSuccess() throws ExecutionException, InterruptedException {
+        String walletId = "mockedWalletId";
+        double amount = 100.0;
+        Wallet wallet = new Wallet();
+
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+        when(walletService.decreaseAmount(walletId, amount)).thenReturn(CompletableFuture.completedFuture(null));
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", walletId, amount).join();
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("Wallet Amount has been Decreased", responseEntity.getBody().get("message"));
-        assertEquals(wallet, responseEntity.getBody().get("wallet"));
     }
 
     @Test
-    public void testAddAmount_WalletNotFound() {
-        String walletId = "1";
-        Double amount = 50.0;
+    void decreaseAmountWalletNotFound() {
+        String walletId = "mockedWalletId";
+        Double amount = 100.0;
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.addAmount(walletId, amount);
-        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", walletId, amount).join();
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals("Wallet with ID " + walletId + " not found.", responseEntity.getBody().get("message"));
+        assertEquals("Wallet with ID mockedWalletId not found.", responseEntity.getBody().get("message"));
     }
 
     @Test
-    public void testAddAmount_NegativeAmount() {
-        String walletId = "1";
-        double amount = -50.0;
-        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
+    void decreaseAmountNegativeAmount() {
+        String walletId = "mockedWalletId";
+        double amount = -100.0;
+        Wallet wallet = new Wallet();
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.addAmount(walletId, amount);
-        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", walletId, amount).join();
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals("totalAmount cannot be negative", responseEntity.getBody().get("message"));
     }
 
-
     @Test
-    public void testDecreaseAmount_WalletNotFound() {
-        String walletId = "1";
-        Double amount = 50.0;
-        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
+    void decreaseAmountInternalServerError() throws ExecutionException, InterruptedException {
+        String walletId = "mockedWalletId";
+        Double amount = 100.0;
+        Wallet wallet = new Wallet();
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+        doThrow(new RuntimeException("Some error occurred")).when(walletService).decreaseAmount(walletId, amount);
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.decreaseAmount(walletId, amount);
-        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", walletId, amount).join();
 
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals("Wallet with ID " + walletId + " not found.", responseEntity.getBody().get("message"));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Something went wrong on the server side", responseEntity.getBody().get("message"));
     }
 
     @Test
-    public void testDecreaseAmount_NegativeAmount() {
-        String walletId = "1";
-        double amount = -50.0;
-
-        Wallet wallet = Wallet.builder().id(walletId).amount(amount).build();
+    void decreaseAmountBadRequest() throws ExecutionException, InterruptedException {
+        String walletId = "mockedWalletId";
+        Double amount = 100.0;
+        Wallet wallet = new Wallet();
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
-        CompletableFuture<ResponseEntity<Map<String, Object>>> result = walletController.decreaseAmount(walletId, amount);
-        ResponseEntity<Map<String, Object>> responseEntity = result.join();
+        doThrow(new IllegalArgumentException("Insufficient funds")).when(walletService).decreaseAmount(walletId, amount);
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", walletId, amount).join();
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals("totalAmount cannot be negative", responseEntity.getBody().get("message"));
+        assertEquals("Insufficient funds", responseEntity.getBody().get("message"));
     }
 
+    @Test
+    void decreaseAmountExpiredJwtToken() {
+        when(jwtAuthFilter.filterToken(anyString())).thenThrow(ExpiredJwtException.class);
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", "mockedWalletId", 100.0).join();
+
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void decreaseAmountEmptyJwtToken() {
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn(null);
+
+        ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", "mockedWalletId", 100.0).join();
+
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+        assertEquals("Login First", responseEntity.getBody().get("message"));
+    }
 
 }

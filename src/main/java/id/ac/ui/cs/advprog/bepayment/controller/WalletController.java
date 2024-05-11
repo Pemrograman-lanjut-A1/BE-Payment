@@ -1,8 +1,10 @@
 package id.ac.ui.cs.advprog.bepayment.controller;
 
+import id.ac.ui.cs.advprog.bepayment.config.JwtAuthFilter;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import id.ac.ui.cs.advprog.bepayment.pojos.WalletRequest;
 import id.ac.ui.cs.advprog.bepayment.service.WalletService;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,18 +21,36 @@ import java.util.concurrent.ExecutionException;
 public class WalletController {
     @Autowired
     private WalletService walletService;
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
 
     @PostMapping("/create")
-    public CompletableFuture<ResponseEntity<Map<String, Object>>> createWallet(@RequestBody WalletRequest walletRequest) {
+    public CompletableFuture<ResponseEntity<Map<String, Object>>> createWallet(@RequestHeader(value = "Authorization") String token, @RequestBody WalletRequest walletRequest) {
+        Map<String, Object> response = new HashMap<>();
+        String role = null;
+        try {
+            role = jwtAuthFilter.filterToken(token);
+        }catch (ExpiredJwtException e){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "JWT token has expired");
+        }catch (Exception e){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "Invalid JWT token");
+
+        }
+
+        if (role == null){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "Login First");
+            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(response));
+        }
         return walletService.createWallet(walletRequest)
                 .thenApply(createdWallet -> {
-                    Map<String, Object> response = new HashMap<>();
                     response.put("wallet", createdWallet);
                     response.put("message", "Wallet Created Successfully");
                     return ResponseEntity.status(HttpStatus.CREATED).body(response);
                 })
                 .exceptionally(e -> {
-                    Map<String, Object> response = new HashMap<>();
                     response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
                     response.put("error", e.getMessage());
                     response.put("message", "Something Wrong With Server");
@@ -81,8 +101,27 @@ public class WalletController {
     }
 
     @PutMapping("/{walletId}/{amount}/add")
-    public CompletableFuture<ResponseEntity<Map<String, Object>>> addAmount(@PathVariable("walletId") String walletId, @PathVariable("amount") Double amount) {
+    public CompletableFuture<ResponseEntity<Map<String, Object>>> addAmount(@RequestHeader(value = "Authorization") String token, @PathVariable("walletId") String walletId, @PathVariable("amount") Double amount) {
         Map<String, Object> response = new HashMap<>();
+
+        String role = null;
+        try {
+            role = jwtAuthFilter.filterToken(token);
+        }catch (ExpiredJwtException e){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "JWT token has expired");
+        }catch (Exception e){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "Invalid JWT token");
+
+        }
+
+        if (role == null){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "Login First");
+            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(response));
+        }
+
         CompletableFuture<Wallet> walletFuture = walletService.findById(walletId);
         return walletFuture.thenApply(wallet -> {
             if (wallet == null) {
@@ -112,8 +151,26 @@ public class WalletController {
 
 
     @PutMapping("/{walletId}/{amount}/decrease")
-    public CompletableFuture<ResponseEntity<Map<String, Object>>> decreaseAmount(@PathVariable("walletId") String walletId, @PathVariable("amount") Double amount) {
+    public CompletableFuture<ResponseEntity<Map<String, Object>>> decreaseAmount(@RequestHeader(value = "Authorization") String token, @PathVariable("walletId") String walletId, @PathVariable("amount") Double amount) {
         Map<String, Object> response = new HashMap<>();
+
+        String role = null;
+        try {
+            role = jwtAuthFilter.filterToken(token);
+        }catch (ExpiredJwtException e){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "JWT token has expired");
+        }catch (Exception e){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "Invalid JWT token");
+
+        }
+
+        if (role == null){
+            response.put("code", HttpStatus.FORBIDDEN.value());
+            response.put("message", "Login First");
+            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(response));
+        }
 
         return walletService.findById(walletId)
                 .thenCompose(wallet -> {
@@ -121,6 +178,11 @@ public class WalletController {
                         response.put("code", HttpStatus.NOT_FOUND.value());
                         response.put("message", "Wallet with ID " + walletId + " not found.");
                         return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND).body(response));
+                    }
+                    if (amount < 0){
+                        response.put("code", HttpStatus.BAD_REQUEST.value());
+                        response.put("message", "totalAmount cannot be negative");
+                        return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response));
                     }
                     try {
                         return walletService.decreaseAmount(walletId, amount)
@@ -145,7 +207,6 @@ public class WalletController {
                     }
                 });
     }
-
 
 
 }
