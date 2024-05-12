@@ -34,7 +34,7 @@ public class TopUpController {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping("/create")
     public CompletableFuture<ResponseEntity<Map<String, Object>>> createTopUp(@RequestHeader(value = "Authorization") String token, @RequestBody TopUpRequest topUpRequest) {
         Map<String, Object> response = new HashMap<>();
         String role = null;
