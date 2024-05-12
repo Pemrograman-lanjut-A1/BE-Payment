@@ -42,7 +42,7 @@ public class WalletRepositoryImpl implements WalletRepository{
 
     @Override
     @Transactional
-    public void addAmount(String id, double totalAmount) {
+    public void setAmount(String id, double totalAmount) {
         entityManager.createQuery("UPDATE wallet w SET w.amount = :totalAmount WHERE w.id = :walletId")
                 .setParameter("totalAmount", totalAmount)
                 .setParameter("walletId", id)

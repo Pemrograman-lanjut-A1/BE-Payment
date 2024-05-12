@@ -8,5 +8,5 @@ public interface WalletRepository {
     public Wallet save(Wallet wallet);
     public Wallet findById(String id);
     public Wallet findByUserId(String userId);
-    public void addAmount(String id, double totalAmount);
+    public void setAmount(String id, double totalAmount);
 }

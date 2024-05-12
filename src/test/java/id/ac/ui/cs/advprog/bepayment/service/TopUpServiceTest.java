@@ -133,21 +133,19 @@ public class TopUpServiceTest {
     }
 
     @Test
-    @Transactional
-    public void testConfirmTopUp_WithValidTopUpId() {
+    public void testConfirmTopUp_WithValidTopUpId() throws ExecutionException, InterruptedException {
         String validTopUpId = "validTopUpId";
 
-        TopUp topUp = new TopUp();
-        topUp.setAmount(50.0);
-        Wallet wallet = new Wallet();
-        wallet.setAmount(100.0);
-        topUp.setWallet(wallet);
+        CompletableFuture<Void> addAmountResult = CompletableFuture.completedFuture(null);
         when(topUpRepository.findById(validTopUpId)).thenReturn(topUp);
+        when(walletService.addAmount("1", 500.0)).thenReturn(addAmountResult);
+        CompletableFuture<Boolean> future = topUpService.confirmTopUp(validTopUpId);
+        future.join();
 
-        CompletableFuture<Boolean> result = topUpService.confirmTopUp(validTopUpId);
-        verify(topUpRepository, times(1)).confirmTopUp(validTopUpId);
-        verify(walletService, times(1)).addAmount(wallet.getId(), 150.0);
+        verify(walletService).addAmount("1", 500.0);
+        assertTrue(future.get());
     }
+
 
     @Test
     void testConfirmTopUpInvalidTopUpIdFailure() throws ExecutionException, InterruptedException {

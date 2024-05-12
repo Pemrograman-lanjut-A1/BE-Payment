@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class WalletServiceImpl implements WalletService{
@@ -36,8 +37,28 @@ public class WalletServiceImpl implements WalletService{
     @Async
     @Transactional
     public CompletableFuture<Void> addAmount(String walletId, double totalAmount) {
-        walletRepository.addAmount(walletId, totalAmount);
-        return CompletableFuture.completedFuture(null);
+        CompletableFuture<Wallet> walletFuture = findById(walletId);
+        return walletFuture.thenCompose(wallet -> {
+            double finalAmount = wallet.getAmount() + totalAmount;
+            walletRepository.setAmount(walletId, finalAmount);
+            return CompletableFuture.completedFuture(null);
+        });
+    }
+
+
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Void> decreaseAmount(String walletId, double totalAmount) throws ExecutionException, InterruptedException {
+        CompletableFuture<Wallet> walletFuture = findById(walletId);
+        return walletFuture.thenCompose(wallet -> {
+            double finalAmount = wallet.getAmount() - totalAmount;
+            if (finalAmount < 0) {
+                return CompletableFuture.failedFuture(new IllegalArgumentException("Final amount cannot be negative"));
+            }
+            walletRepository.setAmount(walletId, finalAmount);
+            return CompletableFuture.completedFuture(null);
+        });
     }
 
     @Override
