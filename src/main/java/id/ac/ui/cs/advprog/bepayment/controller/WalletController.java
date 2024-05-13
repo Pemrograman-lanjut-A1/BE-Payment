@@ -151,9 +151,9 @@ public class WalletController {
                 return ResponseEntity.status(HttpStatus.OK).body(response);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
+                throw new IllegalArgumentException(String.format("An error occurred while adding amount to the wallet."));
             } catch (ExecutionException e) {
-                throw new RuntimeException(e);
+                throw new IllegalArgumentException(String.format("An error occurred while adding amount to the wallet."));
             }
         }).exceptionally(e -> {
             response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -204,8 +204,11 @@ public class WalletController {
                                     response.put(MESSAGE_KEY, "Wallet Amount has been Decreased");
                                     return ResponseEntity.status(HttpStatus.OK).body(response);
                                 });
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new RuntimeException("Error while decreasing amount to wallet", e);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new IllegalArgumentException(String.format("An error occurred while decreasing amount to the wallet."));
+                    } catch (ExecutionException e) {
+                        throw new IllegalArgumentException(String.format("An error occurred while decreasing amount to the wallet."));
                     }
                 })
                 .exceptionally(ex -> {
