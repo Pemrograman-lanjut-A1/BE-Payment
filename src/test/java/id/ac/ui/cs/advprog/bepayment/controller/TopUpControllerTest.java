@@ -273,7 +273,7 @@ class TopUpControllerTest {
 
 
     @Test
-    public void testGetAllWaitingTopUpsInternalServerError() {
+    void testGetAllWaitingTopUpsInternalServerError() {
         when(topUpService.findAllWaiting()).thenThrow(new RuntimeException("Internal Server Error"));
 
         ResponseEntity<?> responseEntity = topUpController.getAllWaitingTopUps();
