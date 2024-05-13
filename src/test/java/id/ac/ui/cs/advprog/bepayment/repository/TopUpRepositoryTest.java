@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class TopUpRepositoryTest {
+class TopUpRepositoryTest {
     @Mock
     TopUpRepository repository;
 
@@ -37,7 +37,7 @@ public class TopUpRepositoryTest {
     private Wallet wallet;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         wallet = Wallet.builder()
                 .id("1")
@@ -52,7 +52,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testSave() {
+    void testSave() {
         when(entityManager.merge(any())).thenReturn(topUp);
 
         TopUp savedTopUp = topUpRepository.save(topUp);
@@ -62,12 +62,12 @@ public class TopUpRepositoryTest {
         assertEquals(topUp.getWallet(), savedTopUp.getWallet());
         assertEquals(topUp.getId(), savedTopUp.getId());
         assertEquals(topUp.getUserId(), savedTopUp.getUserId());
-        assertEquals(topUp.getStatus(), TopUpStatus.WAITING_APPROVAL);
+        assertEquals(TopUpStatus.WAITING_APPROVAL, topUp.getStatus());
         verify(entityManager, times(1)).merge(any());
     }
 
     @Test
-    public void testDeleteAll() {
+    void testDeleteAll() {
         Query query = mock(Query.class);
         when(entityManager.createQuery(anyString())).thenReturn(query);
 
@@ -78,14 +78,14 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testDeleteAllNoQuery() {
+    void testDeleteAllNoQuery() {
         when(entityManager.createQuery(anyString())).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> topUpRepository.deleteAll());
     }
 
     @Test
-    public void testDeleteTopUpByIdQuery() {
+    void testDeleteTopUpByIdQuery() {
         Query query = mock(Query.class);
         when(entityManager.createQuery(anyString())).thenReturn(query);
         doReturn(query).when(query).setParameter(anyString(), any());
@@ -99,7 +99,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testDeleteTopUpById() {
+    void testDeleteTopUpById() {
         String topUpId = topUp.getId();
 
         repository.deleteTopUpById(topUpId);
@@ -108,20 +108,20 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testDeleteTopUpByIdNoQuery() {
+    void testDeleteTopUpByIdNoQuery() {
         when(entityManager.createQuery(anyString())).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> topUpRepository.deleteTopUpById("123"));
     }
 
     @Test
-    public void testDeleteTopUpByIdIfIdNotFound() {
+    void testDeleteTopUpByIdIfIdNotFound() {
         String topUpIdFalse = topUp.getId() + "a";
         assertThrows(NullPointerException.class, () -> topUpRepository.deleteTopUpById(topUpIdFalse));
     }
 
     @Test
-    public void testCancelTopUp() {
+    void testCancelTopUp() {
         Query query = mock(Query.class);
         when(entityManager.createQuery(anyString())).thenReturn(query);
         when(query.setParameter(eq("status"), any())).thenReturn(query);
@@ -138,14 +138,14 @@ public class TopUpRepositoryTest {
 
 
     @Test
-    public void testCancelTopUpNoQuery() {
+    void testCancelTopUpNoQuery() {
         when(entityManager.createQuery(anyString())).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> topUpRepository.cancelTopUp("123"));
     }
 
     @Test
-    public void testConfirmTopUpSuccessfulUpdate() {
+    void testConfirmTopUpSuccessfulUpdate() {
         String topUpId = "valid-top-up-id";
         Query query = mock(Query.class);
         when(entityManager.createQuery(anyString())).thenReturn(query);
@@ -163,7 +163,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testConfirmTopUpNoResultException() {
+    void testConfirmTopUpNoResultException() {
         String topUpId = "invalid-top-up-id";
         when(entityManager.createQuery(anyString())).thenThrow(new NoResultException());
 
@@ -175,7 +175,7 @@ public class TopUpRepositoryTest {
 
 
     @Test
-    public void testFindById() {
+    void testFindById() {
         TopUp expectedTopUp = new TopUp();
         when(entityManager.find(eq(TopUp.class), any())).thenReturn(expectedTopUp);
 
@@ -186,14 +186,14 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testFindByIdNotFound() {
+    void testFindByIdNotFound() {
         when(entityManager.find(eq(TopUp.class), any())).thenReturn(null);
 
         assertNull(topUpRepository.findById("123"));
     }
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
         List<TopUp> expectedTopUps = Collections.emptyList();
         TypedQuery typedQuery = mock(TypedQuery.class);
         when(entityManager.createQuery(anyString(), eq(TopUp.class))).thenReturn(typedQuery);
@@ -207,7 +207,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testFindAllWaiting() {
+    void testFindAllWaiting() {
 
         TypedQuery typedQuery = mock(TypedQuery.class);
         when(typedQuery.setParameter(eq("WAITING_APPROVAL"), any())).thenReturn(typedQuery);
@@ -224,7 +224,7 @@ public class TopUpRepositoryTest {
     }
 
     @Test
-    public void testFindAllEmptyResult() {
+    void testFindAllEmptyResult() {
         List<TopUp> expectedTopUps = Collections.emptyList();
         TypedQuery<TopUp> typedQuery = mock(TypedQuery.class);
         when(entityManager.createQuery(anyString(), eq(TopUp.class))).thenReturn(typedQuery);

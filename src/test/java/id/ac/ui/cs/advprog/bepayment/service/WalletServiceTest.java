@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class WalletServiceTest {
+class WalletServiceTest {
     @Mock
     private WalletRepository walletRepository;
 
@@ -30,7 +30,7 @@ public class WalletServiceTest {
     private Wallet wallet;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         wallet = Wallet.builder()
                 .id("1")
@@ -40,7 +40,7 @@ public class WalletServiceTest {
     }
 
     @Test
-    public void testCreateWallet() {
+    void testCreateWallet() {
         WalletRequest walletRequest = new WalletRequest();
         walletRequest.userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
 
@@ -58,7 +58,7 @@ public class WalletServiceTest {
 
 
     @Test
-    public void testFindById() throws ExecutionException, InterruptedException {
+    void testFindById() throws ExecutionException, InterruptedException {
         Wallet wallet = new Wallet();
         wallet.setId("1");
 
@@ -75,7 +75,7 @@ public class WalletServiceTest {
 
 
     @Test
-    public void testFindByIdWalletNotFound() {
+    void testFindByIdWalletNotFound() {
         when(walletRepository.findById("2")).thenReturn(null);
 
         CompletableFuture<Wallet> foundWalletFuture = walletService.findById("2");
@@ -88,7 +88,7 @@ public class WalletServiceTest {
 
 
     @Test
-    public void testAddAmountDelegatesCorrectly() {
+    void testAddAmountDelegatesCorrectly() {
         String walletId = "1";
         double totalAmount = 1000.0;
 
@@ -98,7 +98,7 @@ public class WalletServiceTest {
     }
 
     @Test
-    public void testAddAmountDelegationFailure() {
+    void testAddAmountDelegationFailure() {
         String walletId = "1";
         double totalAmount = 1000.0;
 
@@ -114,7 +114,7 @@ public class WalletServiceTest {
     }
 
     @Test
-    public void testFindByUserId() {
+    void testFindByUserId() {
         String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
 
         when(walletRepository.findByUserId(userId)).thenReturn(wallet);
@@ -129,7 +129,7 @@ public class WalletServiceTest {
     }
 
     @Test
-    public void testFindByUserIdWalletNotFound() {
+    void testFindByUserIdWalletNotFound() {
         String userId = "nonexistentUserId";
 
         when(walletRepository.findByUserId(userId)).thenReturn(null);
@@ -144,7 +144,7 @@ public class WalletServiceTest {
     }
 
     @Test
-    public void testAddAmount() throws InterruptedException, ExecutionException {
+    void testAddAmount() throws InterruptedException, ExecutionException {
         String walletId = "1";
         double totalAmountToAdd = 50.0;
         double expectedFinalAmount = wallet.getAmount() + totalAmountToAdd;
@@ -158,7 +158,7 @@ public class WalletServiceTest {
     }
 
     @Test
-    public void testDecreaseAmount() throws InterruptedException, ExecutionException {
+    void testDecreaseAmount() throws InterruptedException, ExecutionException {
         String walletId = "1";
         double totalAmountToDecrease = 50.0;
         double expectedFinalAmount = wallet.getAmount() - totalAmountToDecrease;

@@ -4,7 +4,6 @@ import id.ac.ui.cs.advprog.bepayment.enums.TopUpMethod;
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 
 import java.util.Date;
-import java.util.UUID;
 
 public class TopUpBuilder {
     private String id;

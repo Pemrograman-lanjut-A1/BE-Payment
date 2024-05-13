@@ -1,6 +1,8 @@
 name: SonarCloud
 on:
   push:
+    staging
+
 jobs:
   build:
     name: Build and analyze
