@@ -42,7 +42,7 @@ class WalletServiceTest {
     @Test
     void testCreateWallet() {
         WalletRequest walletRequest = new WalletRequest();
-        walletRequest.userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+        walletRequest.setUserId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649");
 
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
 
@@ -50,7 +50,7 @@ class WalletServiceTest {
 
         verify(walletRepository).save(any(Wallet.class));
         assertNotNull(createdWallet);
-        assertEquals(walletRequest.userId, createdWallet.getUserId());
+        assertEquals(walletRequest.getUserId(), createdWallet.getUserId());
         assertNotNull(createdWallet.getId());
         assertEquals(500, createdWallet.getAmount());
     }

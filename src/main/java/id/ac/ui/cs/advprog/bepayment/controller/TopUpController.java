@@ -132,12 +132,15 @@ public class TopUpController {
 
         return topUpService.deleteTopUpById(topUpId)
                 .thenApply(deleted -> {
-                    boolean isDeleted = deleted;
-                    int statusCode = isDeleted ? HttpStatus.OK.value() : HttpStatus.NOT_FOUND.value();
-                    String message = isDeleted ? "deleted successfully" : NOT_FOUND_MESSAGE;
-                    response.put("code", statusCode);
-                    response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " " + message + ".");
-                    return isDeleted ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                    if (Boolean.TRUE.equals(deleted)) {
+                        response.put("code", HttpStatus.OK.value());
+                        response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " deleted successfully.");
+                        return ResponseEntity.ok(response);
+                    } else {
+                        response.put("code", HttpStatus.NOT_FOUND.value());
+                        response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                    }
                 })
                 .exceptionally(e -> {
                     response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -148,7 +151,8 @@ public class TopUpController {
     }
 
 
-        @PutMapping("/{topUpId}/cancel")
+
+    @PutMapping("/{topUpId}/cancel")
     public CompletableFuture<ResponseEntity<Map<String, Object>>> cancelTopUp(@RequestHeader(value = "Authorization") String token, @PathVariable("topUpId") String topUpId) {
             Map<String, Object> response = new HashMap<>();
 
@@ -172,10 +176,15 @@ public class TopUpController {
 
             return topUpService.cancelTopUp(topUpId)
                     .thenApply(cancelled -> {
-                        int statusCode = cancelled ? HttpStatus.OK.value() : HttpStatus.NOT_FOUND.value();
-                        response.put("code", statusCode);
-                        response.put(MESSAGE_KEY, cancelled ? TOP_UP_ID_MESSAGE + topUpId + " cancelled successfully." : TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
-                        return cancelled ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                        if (Boolean.TRUE.equals(cancelled)) {
+                            response.put("code", HttpStatus.OK.value());
+                            response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " cancelled successfully.");
+                            return ResponseEntity.ok(response);
+                        } else {
+                            response.put("code", HttpStatus.NOT_FOUND.value());
+                            response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
+                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                        }
                     })
                     .exceptionally(e -> {
                         response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -210,10 +219,15 @@ public class TopUpController {
 
                 return topUpService.confirmTopUp(topUpId)
                         .thenApply(confirmed -> {
-                            int statusCode = confirmed ? HttpStatus.OK.value() : HttpStatus.NOT_FOUND.value();
-                            response.put("code", statusCode);
-                            response.put(MESSAGE_KEY, confirmed ? TOP_UP_ID_MESSAGE + topUpId + " confirmed successfully." : TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
-                            return confirmed ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                            if (Boolean.TRUE.equals(confirmed)) {
+                                response.put("code", HttpStatus.OK.value());
+                                response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " confirmed successfully.");
+                                return ResponseEntity.ok(response);
+                            } else {
+                                response.put("code", HttpStatus.NOT_FOUND.value());
+                                response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
+                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                            }
                         })
                         .exceptionally(e -> {
                             response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -222,6 +236,7 @@ public class TopUpController {
                             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                         });
             }
+
             @GetMapping("/")
     public CompletableFuture<ResponseEntity<List<TopUp>>> getAllTopUps() {
         Map<String, Object> response = new HashMap<>();

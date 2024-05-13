@@ -24,7 +24,7 @@ public class WalletServiceImpl implements WalletService{
         String walletId = String.valueOf(UUID.randomUUID());
         Wallet wallet = Wallet.builder()
                 .id(walletId)
-                .userId(walletRequest.userId)
+                .userId(walletRequest.getUserId())
                 .amount(0)
                 .build();
         return CompletableFuture.completedFuture(walletRepository.save(wallet));

@@ -13,7 +13,7 @@ public class AsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
     Logger logger = Logger.getLogger(getClass().getName());
     @Override
     public void handleUncaughtException(Throwable ex, Method method, Object... args) {
-        logger.info("Method Name: " + method.getName() + " --- Args: " +
-                Arrays.toString(args) + " --- Error Message: " + ex.getMessage());
+        logger.info(String.format("Method Name: %s --- Args: %s --- Error Message: %s",
+                method.getName(), Arrays.toString(args), ex.getMessage()));
     }
 }
