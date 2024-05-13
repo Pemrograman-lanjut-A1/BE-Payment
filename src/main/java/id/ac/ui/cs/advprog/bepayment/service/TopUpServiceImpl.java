@@ -42,15 +42,15 @@ public class TopUpServiceImpl implements TopUpService {
     @Async
     public CompletableFuture<TopUp> createTopUp(TopUpRequest topUpRequest) {
         return CompletableFuture.supplyAsync(() -> {
-            Wallet wallet = walletRepository.findById(topUpRequest.walletId);
+            Wallet wallet = walletRepository.findById(topUpRequest.getWalletId());
             String topUpId = String.valueOf(UUID.randomUUID());
             TopUp topUp = new TopUpBuilder()
                     .id(topUpId)
-                    .userId(topUpRequest.userId)
+                    .userId(topUpRequest.getUserId())
                     .wallet(wallet)
-                    .amount(topUpRequest.amount)
+                    .amount(topUpRequest.getAmount())
                     .status(TopUpStatus.WAITING_APPROVAL)
-                    .topUpMethod(TopUpMethod.valueOf(topUpRequest.topUpMethod))
+                    .topUpMethod(TopUpMethod.valueOf(topUpRequest.getTopUpMethod()))
                     .dateAdded(new Date())
                     .build();
 
