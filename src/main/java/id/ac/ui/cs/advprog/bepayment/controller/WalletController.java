@@ -26,6 +26,9 @@ public class WalletController {
     private static final String INVALID_JWT_MESSAGE = "Invalid JWT token";
     private static final String FORBIDDEN_MESSAGE = "You are not authorized to make this request";
     private static final String ERROR_KEY_MESSAGE = "Error";
+    private static final String WALLET_ID_MESSAGE = "Wallet with ID ";
+    private static final String NOT_FOUND_MESSAGE = " not found.";
+    private static final String WALLET_STRING = "wallet";
 
     @Autowired
     private WalletService walletService;
@@ -54,7 +57,7 @@ public class WalletController {
         }
         return walletService.createWallet(walletRequest)
                 .thenApply(createdWallet -> {
-                    response.put("wallet", createdWallet);
+                    response.put(WALLET_STRING, createdWallet);
                     response.put(MESSAGE_KEY, "Wallet Created Successfully");
                     return ResponseEntity.status(HttpStatus.CREATED).body(response);
                 })
@@ -73,7 +76,7 @@ public class WalletController {
                     if (wallet == null) {
                         Map<String, Object> response = new HashMap<>();
                         response.put("code", HttpStatus.NOT_FOUND.value());
-                        response.put(MESSAGE_KEY, "Wallet with ID " + walletId + " not found.");
+                        response.put(MESSAGE_KEY, WALLET_ID_MESSAGE + walletId + NOT_FOUND_MESSAGE);
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
                     }
                     return ResponseEntity.ok(wallet);
@@ -94,7 +97,7 @@ public class WalletController {
                     if (wallet == null) {
                         Map<String, Object> response = new HashMap<>();
                         response.put("code", HttpStatus.NOT_FOUND.value());
-                        response.put(MESSAGE_KEY, "Wallet for user ID " + userId + " not found.");
+                        response.put(MESSAGE_KEY, WALLET_ID_MESSAGE + userId + NOT_FOUND_MESSAGE);
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
                     }
                     return ResponseEntity.ok(wallet);
@@ -133,7 +136,7 @@ public class WalletController {
         return walletFuture.thenApply(wallet -> {
             if (wallet == null) {
                 response.put("code", HttpStatus.NOT_FOUND.value());
-                response.put(MESSAGE_KEY, "Wallet with ID " + walletId + " not found.");
+                response.put(MESSAGE_KEY, WALLET_ID_MESSAGE + walletId + NOT_FOUND_MESSAGE);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
             if (amount < 0) {
@@ -143,7 +146,7 @@ public class WalletController {
             }
             try {
                 walletService.addAmount(walletId, amount);
-                response.put("wallet", wallet);
+                response.put(WALLET_STRING, wallet);
                 response.put(MESSAGE_KEY, "Wallet Amount has been Added");
                 return ResponseEntity.status(HttpStatus.OK).body(response);
             } catch (InterruptedException e) {
@@ -186,7 +189,7 @@ public class WalletController {
                 .thenCompose(wallet -> {
                     if (wallet == null) {
                         response.put("code", HttpStatus.NOT_FOUND.value());
-                        response.put(MESSAGE_KEY, "Wallet with ID " + walletId + " not found.");
+                        response.put(MESSAGE_KEY, WALLET_ID_MESSAGE + walletId + NOT_FOUND_MESSAGE);
                         return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND).body(response));
                     }
                     if (amount < 0){
@@ -197,7 +200,7 @@ public class WalletController {
                     try {
                         return walletService.decreaseAmount(walletId, amount)
                                 .thenApply((Void) -> {
-                                    response.put("wallet", wallet);
+                                    response.put(WALLET_STRING, wallet);
                                     response.put(MESSAGE_KEY, "Wallet Amount has been Decreased");
                                     return ResponseEntity.status(HttpStatus.OK).body(response);
                                 });

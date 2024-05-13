@@ -13,6 +13,9 @@ import java.util.List;
 
 @Repository
 public class TopUpRepositoryImpl implements TopUpRepository {
+
+    private static final String TOPUP_ID_MESSAGE = "topUpId";
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -33,7 +36,7 @@ public class TopUpRepositoryImpl implements TopUpRepository {
     public boolean deleteTopUpById(String topUpId) {
         try {
             entityManager.createQuery("DELETE FROM topup t WHERE t.id = :topUpId")
-                    .setParameter("topUpId", topUpId)
+                    .setParameter(TOPUP_ID_MESSAGE, topUpId)
                     .executeUpdate();
             return true;
         }catch (EmptyResultDataAccessException e) {
@@ -47,7 +50,7 @@ public class TopUpRepositoryImpl implements TopUpRepository {
         try {
             entityManager.createQuery("UPDATE topup t SET t.status = :status WHERE t.id = :topUpId")
                     .setParameter("status", TopUpStatus.CANCELLED)
-                    .setParameter("topUpId", topUpId)
+                    .setParameter(TOPUP_ID_MESSAGE, topUpId)
                     .executeUpdate();
             return true;
         } catch (NoResultException e) {
@@ -61,7 +64,7 @@ public class TopUpRepositoryImpl implements TopUpRepository {
         try {
             entityManager.createQuery("UPDATE topup t SET t.status = :status WHERE t.id = :topUpId")
                     .setParameter("status", TopUpStatus.SUCCESS)
-                    .setParameter("topUpId", topUpId)
+                    .setParameter(TOPUP_ID_MESSAGE, topUpId)
                     .executeUpdate();
             return true;
         } catch (NoResultException e) {

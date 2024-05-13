@@ -65,10 +65,10 @@ class TopUpServiceTest {
     @Test
     void createTopUpValidTopUpRequestReturnsTopUp() throws ExecutionException, InterruptedException {
         TopUpRequest topUpRequest = new TopUpRequest();
-        topUpRequest.userId = topUp.getUserId();
-        topUpRequest.walletId = topUp.getWallet().getId();
-        topUpRequest.amount = topUp.getAmount();
-        topUpRequest.topUpMethod = topUp.getTopUpMethod().getValue();
+        topUpRequest.setUserId(topUp.getUserId());
+        topUpRequest.setWalletId(topUp.getWallet().getId());
+        topUpRequest.setAmount(topUp.getAmount());
+        topUpRequest.setTopUpMethod(topUp.getTopUpMethod().getValue());
 
 
         when(walletRepository.findById(anyString())).thenReturn(wallet);
