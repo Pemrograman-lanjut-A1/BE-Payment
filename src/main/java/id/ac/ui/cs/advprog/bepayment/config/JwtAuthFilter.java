@@ -20,7 +20,7 @@ public class JwtAuthFilter {
         Claims claims = jwtService.resolveClaims(token);
 
 
-        if (claims != null & jwtService.validateClaims(claims)) {
+        if (claims != null && jwtService.validateClaims(claims)) {
             return claims.get("Role").toString();
         }
         return null;

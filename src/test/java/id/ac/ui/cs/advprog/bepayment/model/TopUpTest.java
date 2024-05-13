@@ -49,9 +49,7 @@ class TopUpTest {
 
     @Test
     void testSetStatusInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            topUp.setStatus(TopUpStatus.valueOf("INVALID_STATUS"));
-        });
+        assertThrows(IllegalArgumentException.class, () -> TopUpStatus.valueOf("INVALID_STATUS"));
     }
 
     @Test

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TopUpControllerTest {
+class TopUpControllerTest {
 
     @InjectMocks
     private TopUpController topUpController;
@@ -72,7 +72,7 @@ public class TopUpControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = topUpController.createTopUp("mockedToken", new TopUpRequest()).join();
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals("Login First", responseEntity.getBody().get("message"));
+        assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class TopUpControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken").join();
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals("Login First", responseEntity.getBody().get("message"));
+        assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
     }
 
     @Test
@@ -157,7 +157,7 @@ public class TopUpControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", "mockedTopUpId").join();
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals("Login First", responseEntity.getBody().get("message"));
+        assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
     }
 
     @Test
@@ -212,7 +212,7 @@ public class TopUpControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = topUpController.cancelTopUp("mockedToken", "mockedTopUpId").join();
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals("Login First", responseEntity.getBody().get("message"));
+        assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
     }
 
     @Test
@@ -228,7 +228,7 @@ public class TopUpControllerTest {
     }
 
     @Test
-    public void testGetAllTopUpsSuccess() {
+    void testGetAllTopUpsSuccess() {
         List<TopUp> dummyTopUps = Arrays.asList(new TopUp());
         CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(dummyTopUps);
 
@@ -244,7 +244,7 @@ public class TopUpControllerTest {
 
 
     @Test
-    public void testGetAllWaitingTopUpsSuccess() {
+    void testGetAllWaitingTopUpsSuccess() {
         List<TopUp> dummyTopUps = Arrays.asList(new TopUp());
 
         when(topUpService.findAllWaiting()).thenReturn(dummyTopUps);
@@ -257,7 +257,7 @@ public class TopUpControllerTest {
 
 
     @Test
-    public void testGetAllTopUpsInternalServerError() {
+    void testGetAllTopUpsInternalServerError() {
         CompletableFuture<List<TopUp>> future = new CompletableFuture<>();
         future.completeExceptionally(new RuntimeException("Internal Server Error"));
         when(topUpService.findAll()).thenReturn(future);
@@ -281,7 +281,7 @@ public class TopUpControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertInstanceOf(Map.class, responseEntity.getBody());
         Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
-        assertNotNull(responseBody.get("error"));
+        assertNotNull(responseBody.get("Error"));
     }
 
 
@@ -330,8 +330,7 @@ public class TopUpControllerTest {
             Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
             assertNotNull(responseBody);
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseBody.get("code"));
-            assertEquals("Internal Server Error", responseBody.get("error"));
-            assertEquals("Something went wrong with the server", responseBody.get("message"));
+            assertEquals("Something Wrong With Server", responseBody.get("message"));
         }).join();
     }
 
@@ -373,7 +372,7 @@ public class TopUpControllerTest {
         if (responseEntity.getBody() instanceof Map) {
             Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
             assertTrue(responseBody.containsKey("message"));
-            assertTrue(responseBody.get("message").toString().contains("Something went wrong with the server"));
+            assertTrue(responseBody.get("message").toString().contains("Something Wrong With Server"));
         } else {
             fail("Unexpected response body type");
         }
@@ -390,45 +389,34 @@ public class TopUpControllerTest {
 
     @Test
     void confirmTopUpSuccess() {
-        // Mock JwtAuthFilter
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
 
-        // Mock TopUpService
         when(topUpService.confirmTopUp(anyString())).thenReturn(CompletableFuture.completedFuture(true));
 
-        // Test the confirmTopUp method
         ResponseEntity<Map<String, Object>> responseEntity = topUpController.confirmTopUp("mockedToken", "mockedTopUpId").join();
 
-        // Assert the response
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("Top-up with ID mockedTopUpId confirmed successfully.", responseEntity.getBody().get("message"));
     }
 
     @Test
     void confirmTopUpUnauthorized() {
-        // Mock JwtAuthFilter
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("REGULAR");
 
-        // Test the confirmTopUp method
         ResponseEntity<Map<String, Object>> responseEntity = topUpController.confirmTopUp("mockedToken", "mockedTopUpId").join();
 
-        // Assert the response
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals("You cant do this", responseEntity.getBody().get("message"));
+        assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
     }
 
     @Test
     void confirmTopUpInternalServerError() {
-        // Mock JwtAuthFilter
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
 
-        // Mock TopUpService
         when(topUpService.confirmTopUp(anyString())).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Some error occurred")));
 
-        // Test the confirmTopUp method
         ResponseEntity<Map<String, Object>> responseEntity = topUpController.confirmTopUp("mockedToken", "mockedTopUpId").join();
 
-        // Assert the response
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals("Something Wrong With Server", responseEntity.getBody().get("message"));
     }

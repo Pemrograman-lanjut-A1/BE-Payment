@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class WalletRepositoryTest {
+class WalletRepositoryTest {
 
     @Mock
     private EntityManager entityManager;
@@ -31,7 +31,7 @@ public class WalletRepositoryTest {
     private Wallet wallet;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         wallet = Wallet.builder()
                 .id("1")
@@ -42,7 +42,7 @@ public class WalletRepositoryTest {
     }
 
     @Test
-    public void testSave() {
+    void testSave() {
         when(entityManager.merge(wallet)).thenReturn(wallet);
 
         Wallet savedWallet = walletRepository.save(wallet);
@@ -52,7 +52,7 @@ public class WalletRepositoryTest {
     }
 
     @Test
-    public void testFindById() {
+    void testFindById() {
         when(entityManager.find(Wallet.class, "1")).thenReturn(wallet);
 
         Wallet foundWallet = walletRepository.findById("1");
@@ -62,7 +62,7 @@ public class WalletRepositoryTest {
     }
 
     @Test
-    public void testFindByIdDifferentId() {
+    void testFindByIdDifferentId() {
         when(entityManager.find(Wallet.class, "999")).thenReturn(null);
 
         Wallet foundWallet = walletRepository.findById("999");
@@ -73,7 +73,7 @@ public class WalletRepositoryTest {
     }
 
     @Test
-    public void testAddAmount() {
+    void testAddAmount() {
         String walletId = "1";
         double totalAmount = 1000.0;
 
@@ -90,7 +90,7 @@ public class WalletRepositoryTest {
     }
 
     @Test
-    public void testAddAmountUnsuccessfulUpdate() {
+    void testAddAmountUnsuccessfulUpdate() {
         String walletId = "1";
         double totalAmount = 1000.0;
 
@@ -109,7 +109,7 @@ public class WalletRepositoryTest {
     }
 
     @Test
-    public void testFindByUserId() {
+    void testFindByUserId() {
         String userId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
         List<Wallet> wallets = new ArrayList<>();
         wallets.add(wallet);
@@ -127,7 +127,7 @@ public class WalletRepositoryTest {
 
 
     @Test
-    public void testFindByUserIdNotFound() {
+    void testFindByUserIdNotFound() {
         String userId = "nonexistentUserId";
         List<Wallet> wallets = new ArrayList<>();
 

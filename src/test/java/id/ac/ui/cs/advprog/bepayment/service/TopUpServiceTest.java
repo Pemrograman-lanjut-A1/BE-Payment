@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TopUpServiceTest {
+class TopUpServiceTest {
     @InjectMocks
     TopUpServiceImpl topUpService;
     @Mock
@@ -133,7 +133,7 @@ public class TopUpServiceTest {
     }
 
     @Test
-    public void testConfirmTopUp_WithValidTopUpId() throws ExecutionException, InterruptedException {
+    void testConfirmTopUp_WithValidTopUpId() throws ExecutionException, InterruptedException {
         String validTopUpId = "validTopUpId";
 
         CompletableFuture<Void> addAmountResult = CompletableFuture.completedFuture(null);
@@ -227,7 +227,7 @@ public class TopUpServiceTest {
     }
     @Test
     @Transactional
-    public void testFindAllByUserId_WithValidUserIdAndTopUpsExist() {
+    void testFindAllByUserId_WithValidUserIdAndTopUpsExist() {
         String validUserId = "validUserId";
         List<TopUp> topUps = new ArrayList<>();
         topUps.add(new TopUp());
@@ -240,7 +240,7 @@ public class TopUpServiceTest {
 
     @Test
     @Transactional
-    public void testFindAllByUserId_WithValidUserIdAndNoTopUpsExist() {
+    void testFindAllByUserId_WithValidUserIdAndNoTopUpsExist() {
         String validUserId = "validUserId";
         List<TopUp> emptyList = new ArrayList<>();
         when(topUpRepository.findAllByUserId(validUserId)).thenReturn(emptyList);
@@ -252,7 +252,7 @@ public class TopUpServiceTest {
 
     @Test
     @Transactional
-    public void testFindAllByUserId_WithInvalidUserId() {
+    void testFindAllByUserId_WithInvalidUserId() {
         String invalidUserId = "invalidUserId";
         when(topUpRepository.findAllByUserId(invalidUserId)).thenReturn(null);
 
