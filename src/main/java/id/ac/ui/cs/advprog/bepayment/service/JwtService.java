@@ -20,8 +20,7 @@ public class JwtService {
 
     private final JwtParser jwtParser;
 
-    private final static String bearerPrefix = "Bearer ";
-
+    private static final String BEARERPREFIX = "Bearer ";
 
     public JwtService(){
         this.jwtParser = Jwts.parser().setSigningKey(secretKey);
@@ -40,8 +39,8 @@ public class JwtService {
 
     public String resolveToken(String bearerToken) {
 
-        if (bearerToken != null && bearerToken.startsWith(bearerPrefix)) {
-            return bearerToken.substring(bearerPrefix.length());
+        if (bearerToken != null && bearerToken.startsWith(BEARERPREFIX)) {
+            return bearerToken.substring(BEARERPREFIX.length());
         }
         return null;
     }

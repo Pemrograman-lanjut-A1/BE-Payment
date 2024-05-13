@@ -27,6 +27,8 @@ public class TopUpController {
     private static final String INVALID_JWT_MESSAGE = "Invalid JWT token";
     private static final String FORBIDDEN_MESSAGE = "You are not authorized to make this request";
     private static final String ERROR_KEY_MESSAGE = "Error";
+    private static final String TOP_UP_ID_MESSAGE = "Top-up with ID ";
+    private static final String NOT_FOUND_MESSAGE = " not found.";
     @Autowired
     private TopUpService topUpService;
 
@@ -130,10 +132,12 @@ public class TopUpController {
 
         return topUpService.deleteTopUpById(topUpId)
                 .thenApply(deleted -> {
-                    int statusCode = deleted ? HttpStatus.OK.value() : HttpStatus.NOT_FOUND.value();
+                    boolean isDeleted = deleted;
+                    int statusCode = isDeleted ? HttpStatus.OK.value() : HttpStatus.NOT_FOUND.value();
+                    String message = isDeleted ? "deleted successfully" : NOT_FOUND_MESSAGE;
                     response.put("code", statusCode);
-                    response.put(MESSAGE_KEY, deleted ? "Top-up with ID " + topUpId + " deleted successfully." : "Top-up with ID " + topUpId + " not found.");
-                    return deleted ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                    response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " " + message + ".");
+                    return isDeleted ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
                 })
                 .exceptionally(e -> {
                     response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -170,7 +174,7 @@ public class TopUpController {
                     .thenApply(cancelled -> {
                         int statusCode = cancelled ? HttpStatus.OK.value() : HttpStatus.NOT_FOUND.value();
                         response.put("code", statusCode);
-                        response.put(MESSAGE_KEY, cancelled ? "Top-up with ID " + topUpId + " cancelled successfully." : "Top-up with ID " + topUpId + " not found.");
+                        response.put(MESSAGE_KEY, cancelled ? TOP_UP_ID_MESSAGE + topUpId + " cancelled successfully." : TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
                         return cancelled ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
                     })
                     .exceptionally(e -> {
@@ -198,11 +202,7 @@ public class TopUpController {
 
                 }
 
-                if (role == null) {
-                    response.put("code", HttpStatus.FORBIDDEN.value());
-                    response.put(MESSAGE_KEY, FORBIDDEN_MESSAGE);
-                    return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(response));
-                } else if (role.equals("REGULAR")) {
+                if (role == null || role.equals("REGULAR")) {
                     response.put("code", HttpStatus.FORBIDDEN.value());
                     response.put(MESSAGE_KEY, FORBIDDEN_MESSAGE);
                     return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(response));
@@ -212,7 +212,7 @@ public class TopUpController {
                         .thenApply(confirmed -> {
                             int statusCode = confirmed ? HttpStatus.OK.value() : HttpStatus.NOT_FOUND.value();
                             response.put("code", statusCode);
-                            response.put(MESSAGE_KEY, confirmed ? "Top-up with ID " + topUpId + " confirmed successfully." : "Top-up with ID " + topUpId + " not found.");
+                            response.put(MESSAGE_KEY, confirmed ? TOP_UP_ID_MESSAGE + topUpId + " confirmed successfully." : TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
                             return confirmed ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
                         })
                         .exceptionally(e -> {
@@ -258,7 +258,7 @@ public class TopUpController {
             if (topUp == null) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("code", HttpStatus.NOT_FOUND.value());
-                response.put(MESSAGE_KEY, "Top-up with ID " + topUpId + " not found.");
+                response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
             return ResponseEntity.ok(topUp);

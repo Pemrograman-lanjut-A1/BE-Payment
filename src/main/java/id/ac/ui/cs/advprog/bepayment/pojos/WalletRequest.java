@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WalletRequest {
-    public String userId;
+    String userId;
 }
