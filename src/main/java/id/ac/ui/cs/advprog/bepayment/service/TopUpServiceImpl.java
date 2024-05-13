@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.logging.Logger;
 
 import java.util.Date;
 import java.util.List;
@@ -22,10 +22,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Service
 public class TopUpServiceImpl implements TopUpService {
+
+    Logger logger = Logger.getLogger(getClass().getName());
 
     @Autowired
     private TopUpRepository topUpRepository;
@@ -35,7 +36,7 @@ public class TopUpServiceImpl implements TopUpService {
     private WalletService walletService;
     @Autowired
     @Qualifier("asyncExecutor")
-    private Executor executor = Executors.newFixedThreadPool(3);;
+    private Executor executor = Executors.newFixedThreadPool(3);
     @Override
     @Transactional
     @Async
@@ -105,22 +106,28 @@ public class TopUpServiceImpl implements TopUpService {
     @Async
     public CompletableFuture<Boolean> confirmTopUp(String topUpId) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
-        TopUp topUp = topUpRepository.findById(topUpId);
-        if (topUp == null) {
-            future.complete(false);
-            return future;
-        }
         try {
+            TopUp topUp = topUpRepository.findById(topUpId);
+            if (topUp == null) {
+                future.complete(false);
+                return future;
+            }
+
             double finalAmount = topUp.getAmount();
             topUpRepository.confirmTopUp(topUpId);
             walletService.addAmount(topUp.getWallet().getId(), finalAmount);
+
             future.complete(true);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            future.completeExceptionally(e);
         } catch (Exception e) {
-            System.err.println("Error in confirmTopUp: " + e.getMessage());
+            logger.info("Error in confirmTopUp: " + e.getMessage());
             future.complete(false);
         }
         return future;
     }
+
 
 
 
@@ -140,8 +147,7 @@ public class TopUpServiceImpl implements TopUpService {
     @Async("asyncExecutor")
     public CompletableFuture<List<TopUp>> findAll() {
         return CompletableFuture.supplyAsync(() -> {
-            List<TopUp> topUps = topUpRepository.findAll();
-            return topUps;
+            return topUpRepository.findAll();
         });
     }
 

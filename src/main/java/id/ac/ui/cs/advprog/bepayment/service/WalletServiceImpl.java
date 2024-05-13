@@ -1,8 +1,5 @@
 package id.ac.ui.cs.advprog.bepayment.service;
 
-import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
-import id.ac.ui.cs.advprog.bepayment.model.TopUp;
-import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import id.ac.ui.cs.advprog.bepayment.pojos.WalletRequest;
 import id.ac.ui.cs.advprog.bepayment.repository.WalletRepository;

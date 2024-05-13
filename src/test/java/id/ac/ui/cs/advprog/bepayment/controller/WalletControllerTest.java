@@ -1,7 +1,6 @@
 package id.ac.ui.cs.advprog.bepayment.controller;
 
 import id.ac.ui.cs.advprog.bepayment.config.JwtAuthFilter;
-import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import id.ac.ui.cs.advprog.bepayment.pojos.WalletRequest;
 import id.ac.ui.cs.advprog.bepayment.service.WalletService;
@@ -25,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class WalletControllerTest {
+class WalletControllerTest {
     @InjectMocks
     private WalletController walletController;
 
@@ -111,7 +110,7 @@ public class WalletControllerTest {
     }
 
     @Test
-    public void testGetWalletByUserIdSuccess() {
+    void testGetWalletByUserIdSuccess() {
         String userId = "123";
         Wallet expectedWallet = new Wallet();
 
@@ -126,7 +125,7 @@ public class WalletControllerTest {
     }
 
     @Test
-    public void testGetWalletByUserIdInternalServerError() {
+    void testGetWalletByUserIdInternalServerError() {
         String userId = "789";
 
         when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
@@ -139,7 +138,6 @@ public class WalletControllerTest {
 
         Map<String, Object> expectedResponseBody = new HashMap<>();
         expectedResponseBody.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        expectedResponseBody.put("error", "Internal Server Error");
         expectedResponseBody.put("message", "Something Wrong With Server");
 
         Map<String, Object> actualResponseBody = (Map<String, Object>) responseEntity.getBody();
@@ -201,7 +199,7 @@ public class WalletControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", walletId, amount).join();
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals("Something went wrong on the server side", responseEntity.getBody().get("message"));
+        assertEquals("Something Wrong With Server", responseEntity.getBody().get("message"));
     }
 
     @Test
@@ -220,7 +218,7 @@ public class WalletControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = walletController.addAmount("mockedToken", "mockedWalletId", 100.0).join();
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals("Login First", responseEntity.getBody().get("message"));
+        assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
     }
 
 
@@ -279,7 +277,7 @@ public class WalletControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", walletId, amount).join();
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals("Something went wrong on the server side", responseEntity.getBody().get("message"));
+        assertEquals("Something Wrong With Server", responseEntity.getBody().get("message"));
     }
 
     @Test
@@ -313,7 +311,7 @@ public class WalletControllerTest {
         ResponseEntity<Map<String, Object>> responseEntity = walletController.decreaseAmount("mockedToken", "mockedWalletId", 100.0).join();
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals("Login First", responseEntity.getBody().get("message"));
+        assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
     }
 
 }
