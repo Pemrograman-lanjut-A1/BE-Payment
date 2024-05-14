@@ -14,6 +14,6 @@ public interface TopUpService {
     public CompletableFuture<Boolean> confirmTopUp(String topUpId);
     public CompletableFuture<TopUp> findById(String topUpId);
     public CompletableFuture<List<TopUp>> findAll();
-    public List<TopUp> findAllWaiting();
+    public CompletableFuture<List<TopUp>> findAllWaiting();
     public CompletableFuture<List<TopUp>> findAllByUserId(String userId);
 }

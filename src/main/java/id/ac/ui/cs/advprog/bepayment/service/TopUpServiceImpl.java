@@ -28,15 +28,19 @@ public class TopUpServiceImpl implements TopUpService {
 
     Logger logger = Logger.getLogger(getClass().getName());
 
+    private final TopUpRepository topUpRepository;
+    private final WalletRepository walletRepository;
+    private final WalletService walletService;
+    private final Executor executor;
+
     @Autowired
-    private TopUpRepository topUpRepository;
-    @Autowired
-    private WalletRepository walletRepository;
-    @Autowired
-    private WalletService walletService;
-    @Autowired
-    @Qualifier("asyncExecutor")
-    private Executor executor = Executors.newFixedThreadPool(3);
+    public TopUpServiceImpl(TopUpRepository topUpRepository, WalletRepository walletRepository, WalletService walletService, @Qualifier("asyncExecutor") Executor executor) {
+        this.topUpRepository = topUpRepository;
+        this.walletRepository = walletRepository;
+        this.walletService = walletService;
+        this.executor = executor;
+    }
+
     @Override
     @Transactional
     @Async
@@ -127,37 +131,26 @@ public class TopUpServiceImpl implements TopUpService {
         }
         return future;
     }
-
-
-
-
     @Override
     @Transactional
     @Async
     public CompletableFuture<TopUp> findById(String topUpId) {
-        return CompletableFuture.supplyAsync(() -> {
-            return topUpRepository.findById(topUpId);
-        }, executor);
+        return CompletableFuture.supplyAsync(() -> topUpRepository.findById(topUpId), executor);
     }
-
-
 
     @Override
     @Transactional
     @Async("asyncExecutor")
     public CompletableFuture<List<TopUp>> findAll() {
-        return CompletableFuture.supplyAsync(() -> {
-            return topUpRepository.findAll();
-        });
+        return CompletableFuture.supplyAsync(topUpRepository::findAll);
     }
-
 
     @Override
+    @Transactional
     @Async("asyncExecutor")
-    public List<TopUp> findAllWaiting(){
-        return topUpRepository.findAllWaiting();
+    public CompletableFuture<List<TopUp>> findAllWaiting(){
+        return CompletableFuture.supplyAsync(topUpRepository::findAllWaiting);
     }
-
     @Override
     @Transactional
     @Async("asyncExecutor")
