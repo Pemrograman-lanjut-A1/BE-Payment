@@ -253,17 +253,16 @@ public class TopUpController {
 
 
     @GetMapping("/waiting")
-    public ResponseEntity<?> getAllWaitingTopUps(){
-        try {
-            List<TopUp> topUps = topUpService.findAllWaiting();
-            return ResponseEntity.ok(topUps);
-        }catch (Exception e){
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.put(ERROR_KEY_MESSAGE, e.getMessage());
-            response.put(MESSAGE_KEY, INTERNAL_SERVER_ERROR_MESSAGE);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+    public CompletableFuture<ResponseEntity<List<TopUp>>> getAllWaitingTopUps(){
+        CompletableFuture<List<TopUp>> topUpsFuture = topUpService.findAllWaiting();
+        return topUpsFuture.thenApplyAsync(topUps -> ResponseEntity.ok(topUps))
+                .exceptionally(exception -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                    response.put("error", exception.getCause() != null ? exception.getCause().getMessage() : "Unknown error");
+                    response.put("message", "Something went wrong with the server");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+                });
     }
 
     @GetMapping("/{topUpId}")
