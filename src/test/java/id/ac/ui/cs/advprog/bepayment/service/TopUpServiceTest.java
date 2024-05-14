@@ -205,14 +205,17 @@ class TopUpServiceTest {
 
 
     @Test
-    void findAllWaitingReturnsListOfTopUps() {
+    void findAllWaitingReturnsListOfTopUps() throws InterruptedException, ExecutionException {
         List<TopUp> expectedTopUps = new ArrayList<>();
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
+        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(expectedTopUps);
         when(topUpRepository.findAllWaiting()).thenReturn(expectedTopUps);
 
-        List<TopUp> foundTopUps = topUpService.findAllWaiting();
+        CompletableFuture<List<TopUp>> foundTopUpsFuture = topUpService.findAllWaiting();
+
+        List<TopUp> foundTopUps = foundTopUpsFuture.get();
 
         assertNotNull(foundTopUps);
         assertEquals(expectedTopUps.size(), foundTopUps.size());
