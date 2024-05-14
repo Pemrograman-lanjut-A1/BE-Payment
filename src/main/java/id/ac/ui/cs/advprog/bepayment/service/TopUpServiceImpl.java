@@ -153,11 +153,14 @@ public class TopUpServiceImpl implements TopUpService {
 
 
     @Override
+    @Transactional
     @Async("asyncExecutor")
-    public List<TopUp> findAllWaiting(){
-        return topUpRepository.findAllWaiting();
+    public CompletableFuture<List<TopUp>> findAllWaiting(){
+        return CompletableFuture.supplyAsync(() -> {
+            List<TopUp> topUps = topUpRepository.findAllWaiting();
+            return topUps;
+        });
     }
-
     @Override
     @Transactional
     @Async("asyncExecutor")
