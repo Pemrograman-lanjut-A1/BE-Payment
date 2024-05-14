@@ -246,13 +246,16 @@ class TopUpControllerTest {
     @Test
     void testGetAllWaitingTopUpsSuccess() {
         List<TopUp> dummyTopUps = Arrays.asList(new TopUp());
+        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(dummyTopUps);
 
-        when(topUpService.findAllWaiting()).thenReturn(dummyTopUps);
+        when(topUpService.findAllWaiting()).thenReturn(completedFuture);
 
-        ResponseEntity<?> responseEntity = topUpController.getAllWaitingTopUps();
+        CompletableFuture<ResponseEntity<List<TopUp>>> responseFuture = topUpController.getAllWaitingTopUps();
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(dummyTopUps, responseEntity.getBody());
+        responseFuture.thenAccept(responseEntity -> {
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+            assertEquals(dummyTopUps, responseEntity.getBody());
+        }).join();
     }
 
 
@@ -274,15 +277,18 @@ class TopUpControllerTest {
 
     @Test
     void testGetAllWaitingTopUpsInternalServerError() {
-        when(topUpService.findAllWaiting()).thenThrow(new RuntimeException("Internal Server Error"));
+        CompletableFuture<List<TopUp>> future = new CompletableFuture<>();
+        future.completeExceptionally(new RuntimeException("Internal Server Error"));
+        when(topUpService.findAllWaiting()).thenReturn(future);
 
-        ResponseEntity<?> responseEntity = topUpController.getAllWaitingTopUps();
+        CompletableFuture<ResponseEntity<List<TopUp>>> responseFuture = topUpController.getAllWaitingTopUps();
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertInstanceOf(Map.class, responseEntity.getBody());
-        Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
-        assertNotNull(responseBody.get("Error"));
+        responseFuture.thenAccept(responseEntity -> {
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+            assertEquals(Collections.emptyList(), responseEntity.getBody());
+        }).join();
     }
+
 
 
     @Test
