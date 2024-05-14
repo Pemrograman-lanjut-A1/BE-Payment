@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,11 +41,14 @@ class TopUpServiceTest {
     private WalletRepository walletRepository;
 
     private TopUpBuilder topUpBuilder;
+    private Executor executor = Executors.newSingleThreadExecutor();
     private TopUp topUp;
     private Wallet wallet;
 
     @BeforeEach
     void setUp(){
+        MockitoAnnotations.openMocks(this);
+        topUpService = new TopUpServiceImpl(topUpRepository, walletRepository, walletService, executor);
         wallet = Wallet.builder()
                 .id("1")
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
@@ -159,26 +164,28 @@ class TopUpServiceTest {
     @Test
     void findByIdExistingTopUpIdReturnsTopUp() {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        TopUp expectedTopUp = new TopUp();
-        when(topUpRepository.findById(topUpId)).thenReturn(expectedTopUp);
+        when(topUpRepository.findById(topUpId)).thenReturn(topUp);
 
         CompletableFuture<TopUp> futureTopUp = topUpService.findById(topUpId);
         TopUp foundTopUp = futureTopUp.join();
 
         assertNotNull(foundTopUp);
-        assertEquals(expectedTopUp, foundTopUp);
+        assertEquals(topUp, foundTopUp);
     }
 
     @Test
     void findByIdNonExistingTopUpIdReturnsNull() {
         String nonExistingTopUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc6410";
-        when(topUpRepository.findById(anyString())).thenReturn(null);
+        when(topUpRepository.findById(nonExistingTopUpId)).thenReturn(null);
 
         CompletableFuture<TopUp> futureTopUp = topUpService.findById(nonExistingTopUpId);
+
         TopUp foundTopUp = futureTopUp.join();
 
         assertNull(foundTopUp);
     }
+
+
 
     @Test
     void findAllReturnsListOfTopUps() throws InterruptedException, ExecutionException {
