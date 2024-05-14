@@ -1,7 +1,6 @@
 package id.ac.ui.cs.advprog.bepayment.service;
 
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpMethod;
-import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
 import id.ac.ui.cs.advprog.bepayment.model.TopUp;
 import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
 import id.ac.ui.cs.advprog.bepayment.model.Wallet;
@@ -18,8 +17,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -47,8 +44,6 @@ class TopUpServiceTest {
 
     @BeforeEach
     void setUp(){
-        MockitoAnnotations.initMocks(this);
-
         wallet = Wallet.builder()
                 .id("1")
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
@@ -89,7 +84,7 @@ class TopUpServiceTest {
     @Test
     void deleteTopUpByIdExistingTopUpIdReturnsTrue() throws ExecutionException, InterruptedException {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        TopUp topUp = new TopUp();
+        topUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(topUp);
 
         when(topUpRepository.deleteTopUpById(topUpId)).thenReturn(true);
@@ -106,7 +101,7 @@ class TopUpServiceTest {
     @Test
     void cancelTopUpExistingTopUpIdReturnsTrue() throws ExecutionException, InterruptedException {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        TopUp topUp = new TopUp();
+        topUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(topUp);
         when(topUpRepository.cancelTopUp(topUpId)).thenReturn(true);
 
@@ -122,7 +117,7 @@ class TopUpServiceTest {
     @Test
     void cancelTopUpNonExistingTopUpIdReturnsFalse() throws ExecutionException, InterruptedException {
         String nonExistingTopUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc6410";
-        TopUp topUp = null;
+        topUp = null;
         when(topUpRepository.findById(nonExistingTopUpId)).thenReturn(topUp);
 
         CompletableFuture<Boolean> resultFuture = topUpService.cancelTopUp(nonExistingTopUpId);
@@ -191,7 +186,6 @@ class TopUpServiceTest {
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
-        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(expectedTopUps);
         when(topUpRepository.findAll()).thenReturn(expectedTopUps);
 
         CompletableFuture<List<TopUp>> foundTopUpsFuture = topUpService.findAll();
@@ -210,7 +204,6 @@ class TopUpServiceTest {
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
-        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(expectedTopUps);
         when(topUpRepository.findAllWaiting()).thenReturn(expectedTopUps);
 
         CompletableFuture<List<TopUp>> foundTopUpsFuture = topUpService.findAllWaiting();

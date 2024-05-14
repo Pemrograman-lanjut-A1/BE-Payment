@@ -29,11 +29,14 @@ public class TopUpController {
     private static final String ERROR_KEY_MESSAGE = "Error";
     private static final String TOP_UP_ID_MESSAGE = "Top-up with ID ";
     private static final String NOT_FOUND_MESSAGE = " not found.";
-    @Autowired
-    private TopUpService topUpService;
+    private final TopUpService topUpService;
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Autowired
-    private JwtAuthFilter jwtAuthFilter;
+    public TopUpController(TopUpService topUpService, JwtAuthFilter jwtAuthFilter){
+        this.topUpService = topUpService;
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @PostMapping("/create")
     public CompletableFuture<ResponseEntity<Map<String, Object>>> createTopUp(@RequestHeader(value = "Authorization") String token, @RequestBody TopUpRequest topUpRequest) {
@@ -200,7 +203,7 @@ public class TopUpController {
             @GetMapping("/")
             public CompletableFuture<ResponseEntity<List<TopUp>>> getAllTopUps() {
                 CompletableFuture<List<TopUp>> topUpsFuture = topUpService.findAll();
-                return topUpsFuture.thenApplyAsync(topUps -> ResponseEntity.ok(topUps))
+                return topUpsFuture.thenApplyAsync(ResponseEntity::ok)
                         .exceptionally(exception -> {
                             List<TopUp> emptyList = Collections.emptyList();
                             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(emptyList);
@@ -210,16 +213,13 @@ public class TopUpController {
     @GetMapping("/waiting")
     public CompletableFuture<ResponseEntity<List<TopUp>>> getAllWaitingTopUps() {
         return topUpService.findAllWaiting()
-                .thenApply(topUps -> ResponseEntity.ok(topUps))
-                .exceptionally(e -> {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
-                });
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(e ->  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList())
+                );
     }
 
-
-
     @GetMapping("/{topUpId}")
-    public CompletableFuture<ResponseEntity<?>> getTopUpById(@PathVariable("topUpId") String topUpId) {
+    public CompletableFuture<ResponseEntity<Map<String, Object>>> getTopUpById(@PathVariable("topUpId") String topUpId) {
         CompletableFuture<TopUp> topUpFuture = topUpService.findById(topUpId);
         return topUpFuture.thenApplyAsync(topUp -> {
             if (topUp == null) {
@@ -228,12 +228,15 @@ public class TopUpController {
                 response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
-            return ResponseEntity.ok(topUp);
+            Map<String, Object> successResponse = new HashMap<>();
+            successResponse.put("topUp", topUp);
+            return ResponseEntity.ok(successResponse);
         }).exceptionally(exception -> {
             Map<String, Object> errorResponse = handleInternalError((Exception) exception);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         });
     }
+
 
     @GetMapping("/all/{userId}")
     public CompletableFuture<ResponseEntity<Map<String, Object>>> getTopUpByUserId(@PathVariable("userId") String userId) {
