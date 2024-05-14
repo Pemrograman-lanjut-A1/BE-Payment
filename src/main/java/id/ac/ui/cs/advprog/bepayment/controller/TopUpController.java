@@ -140,12 +140,10 @@ public class TopUpController {
             }catch (Exception e){
                 handleJwtException(e);
             }
-
             if (role == null) {
                 Map<String, Object> forbiddenResponse = handleForbidden();
                 return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(forbiddenResponse));
             }
-
             return topUpService.cancelTopUp(topUpId)
                     .thenApply(cancelled -> {
                         if (Boolean.TRUE.equals(cancelled)) {
