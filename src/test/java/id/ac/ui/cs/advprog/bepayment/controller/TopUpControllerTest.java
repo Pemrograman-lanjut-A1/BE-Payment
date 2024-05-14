@@ -303,7 +303,7 @@ class TopUpControllerTest {
 
         responseFuture.thenAccept(responseEntity -> {
             assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-            assertEquals(expectedTopUp, responseEntity.getBody());
+            assertEquals(expectedTopUp, responseEntity.getBody().get("topUp"));
         }).join();
     }
 
