@@ -38,6 +38,7 @@ val junitJupiterVersion = "5.9.1"
 val jsonWebTokenVersion = "0.11.5"
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -45,6 +46,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:$jsonWebTokenVersion")
     implementation("io.jsonwebtoken:jjwt-impl:$jsonWebTokenVersion")
     implementation("io.jsonwebtoken:jjwt-jackson:$jsonWebTokenVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus")
 
     compileOnly("org.projectlombok:lombok")
 
@@ -54,6 +56,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
 
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.seleniumhq.selenium:selenium-java:$seleniumJavaVersion")
