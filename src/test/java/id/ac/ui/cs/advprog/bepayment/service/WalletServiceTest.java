@@ -24,17 +24,14 @@ class WalletServiceTest {
     private WalletRepository walletRepository;
 
     @InjectMocks
-    private WalletServiceImpl walletServiceImpl;
-    @Mock
-    private WalletService walletService;
+    private WalletServiceImpl walletService;
 
     private Wallet wallet;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        walletService = mock(WalletService.class);
-        walletServiceImpl = new WalletServiceImpl(walletRepository, walletService);
+        walletService = new WalletServiceImpl(walletRepository);
         wallet = Wallet.builder()
                 .id("1")
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
@@ -49,7 +46,7 @@ class WalletServiceTest {
 
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
 
-        Wallet createdWallet = walletServiceImpl.createWallet(walletRequest).join();
+        Wallet createdWallet = walletService.createWallet(walletRequest).join();
 
         verify(walletRepository).save(any(Wallet.class));
         assertNotNull(createdWallet);
@@ -64,7 +61,7 @@ class WalletServiceTest {
     void testFindById() throws ExecutionException, InterruptedException {
         when(walletRepository.findById("1")).thenReturn(wallet);
 
-        CompletableFuture<Wallet> foundWalletFuture = walletServiceImpl.findById("1");
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findById("1");
 
         Wallet foundWallet = foundWalletFuture.get();
 
@@ -78,7 +75,7 @@ class WalletServiceTest {
     void testFindByIdWalletNotFound() {
         when(walletRepository.findById("2")).thenReturn(null);
 
-        CompletableFuture<Wallet> foundWalletFuture = walletServiceImpl.findById("2");
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findById("2");
 
         Wallet foundWallet = foundWalletFuture.join();
 
@@ -119,7 +116,7 @@ class WalletServiceTest {
 
         when(walletRepository.findByUserId(userId)).thenReturn(wallet);
 
-        CompletableFuture<Wallet> foundWalletFuture = walletServiceImpl.findByUserId(userId);
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findByUserId(userId);
 
         Wallet foundWallet = foundWalletFuture.join();
 
@@ -134,7 +131,7 @@ class WalletServiceTest {
 
         when(walletRepository.findByUserId(userId)).thenReturn(null);
 
-        CompletableFuture<Wallet> foundWalletFuture = walletServiceImpl.findByUserId(userId);
+        CompletableFuture<Wallet> foundWalletFuture = walletService.findByUserId(userId);
 
         Wallet foundWallet = foundWalletFuture.join();
 
@@ -149,9 +146,9 @@ class WalletServiceTest {
         double totalAmountToAdd = 50.0;
         double expectedFinalAmount = wallet.getAmount() + totalAmountToAdd;
 
-        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+        when(walletService.findById(walletId)).thenAnswer(invocation -> wallet);
 
-        CompletableFuture<Void> result = walletServiceImpl.addAmount(walletId, totalAmountToAdd);
+        CompletableFuture<Void> result = walletService.addAmount(walletId, totalAmountToAdd);
         result.join();
 
         verify(walletRepository).setAmount(walletId, expectedFinalAmount);
@@ -163,9 +160,9 @@ class WalletServiceTest {
         double totalAmountToDecrease = 50.0;
         double expectedFinalAmount = wallet.getAmount() - totalAmountToDecrease;
 
-        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(wallet));
+        when(walletService.findById(walletId)).thenAnswer(invocation -> wallet);
 
-        CompletableFuture<Void> result = walletServiceImpl.decreaseAmount(walletId, totalAmountToDecrease);
+        CompletableFuture<Void> result = walletService.decreaseAmount(walletId, totalAmountToDecrease);
         result.join();
 
         verify(walletRepository).setAmount(walletId, expectedFinalAmount);

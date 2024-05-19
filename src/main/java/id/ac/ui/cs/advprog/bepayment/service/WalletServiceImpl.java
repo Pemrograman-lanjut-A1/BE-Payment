@@ -15,12 +15,10 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class WalletServiceImpl implements WalletService{
     private final WalletRepository walletRepository;
-    private final WalletService walletService;
 
     @Autowired
-    public WalletServiceImpl(WalletRepository walletRepository, WalletService walletService) {
+    public WalletServiceImpl(WalletRepository walletRepository) {
         this.walletRepository = walletRepository;
-        this.walletService = walletService;
     }
 
     @Override
@@ -40,7 +38,7 @@ public class WalletServiceImpl implements WalletService{
     @Async
     @Transactional
     public CompletableFuture<Void> addAmount(String walletId, double totalAmount) {
-        CompletableFuture<Wallet> walletFuture = walletService.findById(walletId);
+        CompletableFuture<Wallet> walletFuture = this.findById(walletId);
         return walletFuture.thenCompose(wallet -> {
             double finalAmount = wallet.getAmount() + totalAmount;
             walletRepository.setAmount(walletId, finalAmount);
@@ -53,7 +51,7 @@ public class WalletServiceImpl implements WalletService{
     @Async
     @Transactional
     public CompletableFuture<Void> decreaseAmount(String walletId, double totalAmount) throws ExecutionException, InterruptedException {
-        CompletableFuture<Wallet> walletFuture = walletService.findById(walletId);
+        CompletableFuture<Wallet> walletFuture = this.findById(walletId);
         return walletFuture.thenCompose(wallet -> {
             double finalAmount = wallet.getAmount() - totalAmount;
             if (finalAmount < 0) {
