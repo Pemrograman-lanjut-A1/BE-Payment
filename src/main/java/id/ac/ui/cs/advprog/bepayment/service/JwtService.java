@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 
 import io.jsonwebtoken.*;
@@ -34,9 +35,11 @@ public class JwtService {
 
     public Claims resolveClaims(String bearerToken) {
         String token = resolveToken(bearerToken);
+
         if (token != null) {
             return parseJwtClaims(token);
         }
+
         return null;
     }
 

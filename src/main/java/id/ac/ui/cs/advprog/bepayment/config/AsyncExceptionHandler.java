@@ -9,11 +9,21 @@ import java.util.Arrays;
 
 @Component
 public class AsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
-
     Logger logger = Logger.getLogger(getClass().getName());
+
     @Override
     public void handleUncaughtException(Throwable ex, Method method, Object... args) {
-        logger.info(String.format("Method Name: %s --- Args: %s --- Error Message: %s",
-                method.getName(), Arrays.toString(args), ex.getMessage()));
+        String methodName = null;
+        String argsString = null;
+
+        methodName = method.getName();
+
+        if (args.length > 0) {
+            argsString = Arrays.toString(args);
+        }
+
+        logger.info(String.format(
+                "Method Name: %s --- Args: %s --- Error Message: %s",
+                methodName, argsString, ex.getMessage()));
     }
 }
