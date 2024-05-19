@@ -203,7 +203,7 @@ public class WalletController {
                     }
                     try {
                         return walletService.decreaseAmount(walletId, amount)
-                                .thenApply(Void -> {
+                                .thenApply(unused -> {
                                     response.put(WALLET_STRING, wallet);
                                     response.put(MESSAGE_KEY, "Wallet Amount has been Decreased");
                                     return ResponseEntity.status(HttpStatus.OK).body(response);
