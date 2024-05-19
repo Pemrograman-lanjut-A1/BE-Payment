@@ -30,10 +30,13 @@ public class WalletController {
     private static final String NOT_FOUND_MESSAGE = " not found.";
     private static final String WALLET_STRING = "wallet";
 
+    private final WalletService walletService;
+    private final JwtAuthFilter jwtAuthFilter;
     @Autowired
-    private WalletService walletService;
-    @Autowired
-    private JwtAuthFilter jwtAuthFilter;
+    public WalletController(WalletService walletService, JwtAuthFilter jwtAuthFilter) {
+        this.walletService = walletService;
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @PostMapping("/create")
     public CompletableFuture<ResponseEntity<Map<String, Object>>> createWallet(@RequestHeader(value = "Authorization") String token, @RequestBody WalletRequest walletRequest) {
@@ -70,45 +73,46 @@ public class WalletController {
     }
 
     @GetMapping("/{walletId}")
-    public CompletableFuture<ResponseEntity<?>> getWalletById(@PathVariable("walletId") String walletId) {
+    public CompletableFuture<ResponseEntity<Object>> getWalletById(@PathVariable("walletId") String walletId) {
         return walletService.findById(walletId)
                 .thenApply(wallet -> {
                     if (wallet == null) {
                         Map<String, Object> response = new HashMap<>();
                         response.put("code", HttpStatus.NOT_FOUND.value());
                         response.put(MESSAGE_KEY, WALLET_ID_MESSAGE + walletId + NOT_FOUND_MESSAGE);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body((Object) response);
                     }
-                    return ResponseEntity.ok(wallet);
+                    return ResponseEntity.ok((Object) wallet);
                 })
                 .exceptionally(e -> {
                     Map<String, Object> response = new HashMap<>();
                     response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
-                    response.put(ERROR_KEY_MESSAGE, e.getMessage());
-                    response.put(MESSAGE_KEY, INTERNAL_SERVER_ERROR_MESSAGE);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                    response.put(ERROR_KEY_MESSAGE, INTERNAL_SERVER_ERROR_MESSAGE);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) response);
                 });
     }
 
+
     @GetMapping("/{userId}/user")
-    public CompletableFuture<ResponseEntity<?>> getWalletByUserId(@PathVariable("userId") String userId) {
+    public CompletableFuture<ResponseEntity<Object>> getWalletByUserId(@PathVariable("userId") String userId) {
         return walletService.findByUserId(userId)
                 .thenApply(wallet -> {
                     if (wallet == null) {
                         Map<String, Object> response = new HashMap<>();
                         response.put("code", HttpStatus.NOT_FOUND.value());
                         response.put(MESSAGE_KEY, WALLET_ID_MESSAGE + userId + NOT_FOUND_MESSAGE);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body((Object) response);
                     }
-                    return ResponseEntity.ok(wallet);
+                    return ResponseEntity.ok((Object) wallet);
                 })
                 .exceptionally(e -> {
                     Map<String, Object> response = new HashMap<>();
                     response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
                     response.put(MESSAGE_KEY, INTERNAL_SERVER_ERROR_MESSAGE);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Object) response);
                 });
     }
+
 
     @PutMapping("/{walletId}/{amount}/add")
     public CompletableFuture<ResponseEntity<Map<String, Object>>> addAmount(@RequestHeader(value = "Authorization") String token, @PathVariable("walletId") String walletId, @PathVariable("amount") Double amount) {
@@ -151,9 +155,9 @@ public class WalletController {
                 return ResponseEntity.status(HttpStatus.OK).body(response);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new IllegalArgumentException(String.format("An error occurred while adding amount to the wallet."));
+                throw new IllegalArgumentException("An error occurred while adding amount to the wallet.");
             } catch (ExecutionException e) {
-                throw new IllegalArgumentException(String.format("An error occurred while adding amount to the wallet."));
+                throw new IllegalArgumentException("An error occurred while adding amount to the wallet.");
             }
         }).exceptionally(e -> {
             response.put("code", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -199,16 +203,16 @@ public class WalletController {
                     }
                     try {
                         return walletService.decreaseAmount(walletId, amount)
-                                .thenApply((Void) -> {
+                                .thenApply(unused -> {
                                     response.put(WALLET_STRING, wallet);
                                     response.put(MESSAGE_KEY, "Wallet Amount has been Decreased");
                                     return ResponseEntity.status(HttpStatus.OK).body(response);
                                 });
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        throw new IllegalArgumentException(String.format("An error occurred while decreasing amount to the wallet."));
+                        throw new IllegalArgumentException("An error occurred while decreasing amount to the wallet.");
                     } catch (ExecutionException e) {
-                        throw new IllegalArgumentException(String.format("An error occurred while decreasing amount to the wallet."));
+                        throw new IllegalArgumentException("An error occurred while decreasing amount to the wallet.");
                     }
                 })
                 .exceptionally(ex -> {

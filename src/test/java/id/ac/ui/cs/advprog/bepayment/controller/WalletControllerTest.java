@@ -72,7 +72,7 @@ class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(expectedWallet));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -86,7 +86,7 @@ class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -101,7 +101,7 @@ class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -116,7 +116,7 @@ class WalletControllerTest {
 
         when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.completedFuture(expectedWallet));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletByUserId(userId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletByUserId(userId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -125,12 +125,25 @@ class WalletControllerTest {
     }
 
     @Test
+    void testGetWalletByUserId_WalletNotFound() throws Exception {
+        String userId = "user123";
+
+        when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.completedFuture(null));
+
+        CompletableFuture<ResponseEntity<Object>> futureResponseEntity = walletController.getWalletByUserId(userId);
+        ResponseEntity<Object> responseEntity = futureResponseEntity.get();
+
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("Wallet with ID user123 not found.", ((Map<?, ?>) responseEntity.getBody()).get("message"));
+    }
+
+    @Test
     void testGetWalletByUserIdInternalServerError() {
         String userId = "789";
 
         when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletByUserId(userId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletByUserId(userId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -141,7 +154,8 @@ class WalletControllerTest {
         expectedResponseBody.put("message", "Something Wrong With Server");
 
         Map<String, Object> actualResponseBody = (Map<String, Object>) responseEntity.getBody();
-
+        System.out.println(expectedResponseBody);
+        System.out.println(actualResponseBody);
         assertEquals(expectedResponseBody, actualResponseBody);
     }
 
@@ -219,6 +233,41 @@ class WalletControllerTest {
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
         assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
+    }
+
+    @Test
+    void testDecreaseAmount_InterruptedException() throws Exception {
+        String walletId = "wallet123";
+        double amount = 100.0;
+        InterruptedException exception = new InterruptedException("Interrupted while decreasing amount to the wallet.");
+
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ROLE_USER");
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(new Wallet()));
+        when(walletService.decreaseAmount(walletId, amount)).thenThrow(exception);
+
+        CompletableFuture<ResponseEntity<Map<String, Object>>> futureResponseEntity = walletController.decreaseAmount("token123", walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = futureResponseEntity.get();
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("An error occurred while decreasing amount to the wallet.", responseEntity.getBody().get("message"));
+    }
+
+
+    @Test
+    void testDecreaseAmount_ExecutionException() throws Exception {
+        String walletId = "wallet123";
+        double amount = 100.0;
+        ExecutionException exception = new ExecutionException(new RuntimeException("Execution exception occurred while decreasing amount to the wallet."));
+
+        when(jwtAuthFilter.filterToken(anyString())).thenReturn("ROLE_USER");
+        when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(new Wallet()));
+        when(walletService.decreaseAmount(walletId, amount)).thenThrow(exception);
+
+        CompletableFuture<ResponseEntity<Map<String, Object>>> futureResponseEntity = walletController.decreaseAmount("token123", walletId, amount);
+        ResponseEntity<Map<String, Object>> responseEntity = futureResponseEntity.get();
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("An error occurred while decreasing amount to the wallet.", responseEntity.getBody().get("message"));
     }
 
 
