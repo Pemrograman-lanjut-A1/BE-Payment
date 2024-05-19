@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -32,6 +31,7 @@ class WalletServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        walletService = new WalletServiceImpl(walletRepository);
         wallet = Wallet.builder()
                 .id("1")
                 .userId("3df9d41b-33c3-42a1-b0a4-43cf0ffdc649")
@@ -59,9 +59,6 @@ class WalletServiceTest {
 
     @Test
     void testFindById() throws ExecutionException, InterruptedException {
-        Wallet wallet = new Wallet();
-        wallet.setId("1");
-
         when(walletRepository.findById("1")).thenReturn(wallet);
 
         CompletableFuture<Wallet> foundWalletFuture = walletService.findById("1");
@@ -144,7 +141,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void testAddAmount() throws InterruptedException, ExecutionException {
+    void testAddAmount() {
         String walletId = "1";
         double totalAmountToAdd = 50.0;
         double expectedFinalAmount = wallet.getAmount() + totalAmountToAdd;

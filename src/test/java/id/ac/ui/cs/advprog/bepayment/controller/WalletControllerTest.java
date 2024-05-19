@@ -72,7 +72,7 @@ class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(expectedWallet));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -86,7 +86,7 @@ class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.completedFuture(null));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -101,7 +101,7 @@ class WalletControllerTest {
 
         when(walletService.findById(walletId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletById(walletId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletById(walletId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -116,7 +116,7 @@ class WalletControllerTest {
 
         when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.completedFuture(expectedWallet));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletByUserId(userId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletByUserId(userId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -130,7 +130,7 @@ class WalletControllerTest {
 
         when(walletService.findByUserId(userId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Internal Server Error")));
 
-        CompletableFuture<ResponseEntity<?>> responseEntityFuture = walletController.getWalletByUserId(userId);
+        CompletableFuture<ResponseEntity<Object>> responseEntityFuture = walletController.getWalletByUserId(userId);
 
         ResponseEntity<?> responseEntity = responseEntityFuture.join();
 
@@ -141,7 +141,8 @@ class WalletControllerTest {
         expectedResponseBody.put("message", "Something Wrong With Server");
 
         Map<String, Object> actualResponseBody = (Map<String, Object>) responseEntity.getBody();
-
+        System.out.println(expectedResponseBody);
+        System.out.println(actualResponseBody);
         assertEquals(expectedResponseBody, actualResponseBody);
     }
 

@@ -16,10 +16,13 @@ public class JwtAuthFilter {
         if (accessToken == null) {
             return null;
         }
-
-        Claims claims = jwtService.resolveClaims(token);
-
-
+        Claims claims = null;
+        try {
+            claims = jwtService.resolveClaims(token);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        System.out.println("dwnaidnwaid");
         if (claims != null && jwtService.validateClaims(claims)) {
             return claims.get("Role").toString();
         }

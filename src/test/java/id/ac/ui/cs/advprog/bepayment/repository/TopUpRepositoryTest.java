@@ -150,7 +150,7 @@ class TopUpRepositoryTest {
         Query query = mock(Query.class);
         when(entityManager.createQuery(anyString())).thenReturn(query);
         when(query.setParameter(eq("status"), any())).thenReturn(query);
-        when(query.setParameter(eq("topUpId"), eq(topUpId))).thenReturn(query);
+        when(query.setParameter("topUpId", topUpId)).thenReturn(query);
         when(query.executeUpdate()).thenReturn(1);
 
         boolean result = topUpRepository.confirmTopUp(topUpId);
@@ -158,7 +158,7 @@ class TopUpRepositoryTest {
         assertTrue(result, "confirmTopUp should return true for a successful update");
         verify(entityManager, times(1)).createQuery(anyString());
         verify(query, times(1)).setParameter(eq("status"), any());
-        verify(query, times(1)).setParameter(eq("topUpId"), eq(topUpId));
+        verify(query, times(1)).setParameter("topUpId", topUpId);
         verify(query, times(1)).executeUpdate();
     }
 

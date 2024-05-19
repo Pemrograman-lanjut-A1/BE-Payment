@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.Date;
 
 import io.jsonwebtoken.*;
@@ -23,7 +24,9 @@ public class JwtService {
     private static final String BEARERPREFIX = "Bearer ";
 
     public JwtService(){
-        this.jwtParser = Jwts.parser().setSigningKey(secretKey);
+        this.jwtParser = Jwts.parserBuilder()
+                .setSigningKey(Base64.getDecoder().decode(secretKey))
+                .build();
     }
     private Claims parseJwtClaims(String token) {
         return jwtParser.parseClaimsJws(token).getBody();

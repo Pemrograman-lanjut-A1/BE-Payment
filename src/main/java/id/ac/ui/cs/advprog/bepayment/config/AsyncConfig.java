@@ -4,21 +4,25 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
 @Configuration
-public class AsyncConfig extends AsyncConfigurerSupport {
+@EnableAsync
+public class AsyncConfig implements AsyncConfigurer {
 
+    private final AsyncExceptionHandler asyncExceptionHandler;
 
-    @Autowired
-    private AsyncExceptionHandler asyncExceptionHandler;
+    public AsyncConfig(AsyncExceptionHandler asyncExceptionHandler) {
+        this.asyncExceptionHandler = asyncExceptionHandler;
+    }
 
-    @Override
     @Bean(name = "asyncExecutor")
-    public Executor getAsyncExecutor() {
+    public Executor asyncExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(5);
         taskExecutor.setMaxPoolSize(10);
@@ -26,6 +30,11 @@ public class AsyncConfig extends AsyncConfigurerSupport {
         taskExecutor.setThreadNamePrefix("Async-example-thread-");
         taskExecutor.initialize();
         return taskExecutor;
+    }
+
+    @Override
+    public Executor getAsyncExecutor() {
+        return asyncExecutor();
     }
 
     @Override

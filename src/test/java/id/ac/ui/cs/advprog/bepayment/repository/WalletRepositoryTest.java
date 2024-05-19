@@ -114,11 +114,11 @@ class WalletRepositoryTest {
         List<Wallet> wallets = new ArrayList<>();
         wallets.add(wallet);
 
-        TypedQuery<Wallet> query = mock(TypedQuery.class);
+        TypedQuery<Wallet> walletQuery = mock(TypedQuery.class);
 
-        when(entityManager.createQuery(anyString(), eq(Wallet.class))).thenReturn(query);
-        when(query.setParameter("userId", userId)).thenReturn(query);
-        when(query.getResultList()).thenReturn(wallets);
+        when(entityManager.createQuery(anyString(), eq(Wallet.class))).thenReturn(walletQuery);
+        when(walletQuery.setParameter("userId", userId)).thenReturn(walletQuery);
+        when(walletQuery.getResultList()).thenReturn(wallets);
 
         Wallet foundWallet = walletRepository.findByUserId(userId);
 
@@ -131,11 +131,11 @@ class WalletRepositoryTest {
         String userId = "nonexistentUserId";
         List<Wallet> wallets = new ArrayList<>();
 
-        TypedQuery<Wallet> query = mock(TypedQuery.class);
+        TypedQuery<Wallet> walletQuery = mock(TypedQuery.class);
 
-        when(entityManager.createQuery(anyString(), eq(Wallet.class))).thenReturn(query);
-        when(query.setParameter("userId", userId)).thenReturn(query);
-        when(query.getResultList()).thenReturn(wallets);
+        when(entityManager.createQuery(anyString(), eq(Wallet.class))).thenReturn(walletQuery);
+        when(walletQuery.setParameter("userId", userId)).thenReturn(walletQuery);
+        when(walletQuery.getResultList()).thenReturn(wallets);
 
         Wallet foundWallet = walletRepository.findByUserId(userId);
 
