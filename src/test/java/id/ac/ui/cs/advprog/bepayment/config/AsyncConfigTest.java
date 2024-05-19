@@ -1,7 +1,5 @@
 package id.ac.ui.cs.advprog.bepayment.config;
 
-import id.ac.ui.cs.advprog.bepayment.config.AsyncConfig;
-import id.ac.ui.cs.advprog.bepayment.config.AsyncExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
