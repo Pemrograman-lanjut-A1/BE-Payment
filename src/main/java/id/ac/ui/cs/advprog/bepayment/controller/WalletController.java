@@ -210,9 +210,9 @@ public class WalletController {
                                 });
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        throw new IllegalArgumentException("An error occurred while adding amount to the wallet.");
+                        throw new IllegalArgumentException("An error occurred while decreasing amount to the wallet.");
                     } catch (ExecutionException e) {
-                        throw new IllegalArgumentException("An error occurred while adding amount to the wallet.");
+                        throw new IllegalArgumentException("An error occurred while decreasing amount to the wallet.");
                     }
                 })
                 .exceptionally(ex -> {

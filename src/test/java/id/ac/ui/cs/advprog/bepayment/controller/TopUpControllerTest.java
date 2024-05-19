@@ -273,8 +273,6 @@ class TopUpControllerTest {
         }).join();
     }
 
-
-
     @Test
     void testGetAllWaitingTopUpsInternalServerError() {
         CompletableFuture<List<TopUp>> future = new CompletableFuture<>();
