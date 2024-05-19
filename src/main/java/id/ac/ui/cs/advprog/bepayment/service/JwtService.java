@@ -34,9 +34,11 @@ public class JwtService {
 
     public Claims resolveClaims(String bearerToken) {
         String token = resolveToken(bearerToken);
+
         if (token != null) {
             return parseJwtClaims(token);
         }
+
         return null;
     }
 

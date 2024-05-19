@@ -38,7 +38,7 @@ public class WalletServiceImpl implements WalletService{
     @Async
     @Transactional
     public CompletableFuture<Void> addAmount(String walletId, double totalAmount) {
-        CompletableFuture<Wallet> walletFuture = findById(walletId);
+        CompletableFuture<Wallet> walletFuture = this.findById(walletId);
         return walletFuture.thenCompose(wallet -> {
             double finalAmount = wallet.getAmount() + totalAmount;
             walletRepository.setAmount(walletId, finalAmount);
@@ -51,7 +51,7 @@ public class WalletServiceImpl implements WalletService{
     @Async
     @Transactional
     public CompletableFuture<Void> decreaseAmount(String walletId, double totalAmount) throws ExecutionException, InterruptedException {
-        CompletableFuture<Wallet> walletFuture = findById(walletId);
+        CompletableFuture<Wallet> walletFuture = this.findById(walletId);
         return walletFuture.thenCompose(wallet -> {
             double finalAmount = wallet.getAmount() - totalAmount;
             if (finalAmount < 0) {
