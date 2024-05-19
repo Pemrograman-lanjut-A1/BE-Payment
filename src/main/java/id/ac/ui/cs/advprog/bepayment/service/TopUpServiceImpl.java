@@ -43,7 +43,7 @@ public class TopUpServiceImpl implements TopUpService {
 
     @Override
     @Transactional
-    @Async
+    @Async("asyncExecutor")
     public CompletableFuture<TopUp> createTopUp(TopUpRequest topUpRequest) {
         return CompletableFuture.supplyAsync(() -> {
             Wallet wallet = walletRepository.findById(topUpRequest.getWalletId());
@@ -63,7 +63,7 @@ public class TopUpServiceImpl implements TopUpService {
     }
 
     @Override
-    @Async
+    @Async("asyncExecutor")
     @Transactional
     public CompletableFuture<Object> deleteAllTopUp() {
         topUpRepository.deleteAll();
@@ -71,6 +71,7 @@ public class TopUpServiceImpl implements TopUpService {
     }
 
     @Override
+    @Async("asyncExecutor")
     @Transactional
     public CompletableFuture<Boolean> deleteTopUpById(String topUpId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -89,7 +90,7 @@ public class TopUpServiceImpl implements TopUpService {
 
 
     @Override
-    @Async
+    @Async("asyncExecutor")
     @Transactional
     public CompletableFuture<Boolean> cancelTopUp(String topUpId) {
         TopUp topUp = topUpRepository.findById(topUpId);
@@ -107,7 +108,7 @@ public class TopUpServiceImpl implements TopUpService {
 
     @Override
     @Transactional
-    @Async
+    @Async("asyncExecutor")
     public CompletableFuture<Boolean> confirmTopUp(String topUpId) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         try {
@@ -133,7 +134,7 @@ public class TopUpServiceImpl implements TopUpService {
     }
     @Override
     @Transactional
-    @Async
+    @Async("asyncExecutor")
     public CompletableFuture<TopUp> findById(String topUpId) {
         return CompletableFuture.supplyAsync(() -> topUpRepository.findById(topUpId), executor);
     }
@@ -159,3 +160,4 @@ public class TopUpServiceImpl implements TopUpService {
     }
 
 }
+

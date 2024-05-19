@@ -2,9 +2,6 @@ package id.ac.ui.cs.advprog.bepayment.model;
 
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpMethod;
 import id.ac.ui.cs.advprog.bepayment.enums.TopUpStatus;
-import id.ac.ui.cs.advprog.bepayment.model.TopUp;
-import id.ac.ui.cs.advprog.bepayment.model.TopUpBuilder;
-import id.ac.ui.cs.advprog.bepayment.model.Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
