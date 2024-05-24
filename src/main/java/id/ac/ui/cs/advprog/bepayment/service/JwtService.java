@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.bepayment.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +18,14 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
     @Value("${jwt.secret}")
-    private String secretKey = "6o0fY3XZm6vcwmuOalTRZvMZmJ31DO2NyOSjJoj4XRwz7uGI8FAQ5kELHS+pmAD+i9idb7Sg8uigefSVAfwBXA==";
+    private String secretKey;
 
-    private final JwtParser jwtParser;
+    private JwtParser jwtParser;
 
     private static final String BEARERPREFIX = "Bearer ";
 
-    public JwtService(){
+    @PostConstruct
+    public void init(){
         this.jwtParser = Jwts.parserBuilder()
                 .setSigningKey(Base64.getDecoder().decode(secretKey))
                 .build();
@@ -34,7 +36,6 @@ public class JwtService {
 
     public Claims resolveClaims(String bearerToken) {
         String token = resolveToken(bearerToken);
-
         if (token != null) {
             return parseJwtClaims(token);
         }

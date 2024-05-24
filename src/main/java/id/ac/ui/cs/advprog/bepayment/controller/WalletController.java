@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(path="wallet", produces = "application/json")
-@CrossOrigin(origins="*")
+@CrossOrigin(origins={"http://localhost:8080", "http://34.142.213.219", "https://fe-repo-inky.vercel.app"})
 public class WalletController {
 
     private static final String MESSAGE_KEY = "message";
