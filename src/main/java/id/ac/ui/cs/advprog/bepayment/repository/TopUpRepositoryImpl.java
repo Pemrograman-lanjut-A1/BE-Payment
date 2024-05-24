@@ -88,7 +88,7 @@ public class TopUpRepositoryImpl implements TopUpRepository {
     @Override
     @Transactional
     public List<TopUp> findAllWaiting() {
-        return entityManager.createQuery("SELECT t FROM topup t WHERE t.status = :WAITING_APPROVAL", TopUp.class)
+        return entityManager.createQuery("SELECT t FROM topup t WHERE t.status = :WAITING_APPROVAL ORDER BY t.dateAdded DESC", TopUp.class)
                 .setParameter("WAITING_APPROVAL", TopUpStatus.WAITING_APPROVAL)
                 .getResultList();
     }
