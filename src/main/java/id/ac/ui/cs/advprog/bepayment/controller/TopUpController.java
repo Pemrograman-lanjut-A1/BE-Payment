@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping(path="topup", produces = "application/json")
-@CrossOrigin(origins="*")
+@CrossOrigin(origins={"http://localhost:8080", "http://34.142.213.219", "https://fe-repo-inky.vercel.app"})
 public class TopUpController {
 
     private static final String MESSAGE_KEY = "message";

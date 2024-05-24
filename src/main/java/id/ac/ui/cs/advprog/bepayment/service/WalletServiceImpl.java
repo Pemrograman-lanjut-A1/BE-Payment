@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class WalletServiceImpl implements WalletService{
+
     private final WalletRepository walletRepository;
 
     @Autowired
