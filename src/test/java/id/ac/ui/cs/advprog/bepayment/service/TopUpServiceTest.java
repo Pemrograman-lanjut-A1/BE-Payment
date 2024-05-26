@@ -161,7 +161,6 @@ class TopUpServiceTest {
     @Test
     void findByIdExistingTopUpIdReturnsTopUp() {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        TopUp topUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(topUp);
 
         TopUp foundTopUp = topUpService.findById(topUpId);
