@@ -68,67 +68,66 @@ public class TopUpController {
 
 
     @DeleteMapping("/")
-    public CompletableFuture<ResponseEntity<Map<String, Object>>> deleteAllTopUp(@RequestHeader(value = "Authorization") String token) {
+    public ResponseEntity<Map<String, Object>> deleteAllTopUp(@RequestHeader(value = "Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
 
         String role = null;
         try {
             role = jwtAuthFilter.filterToken(token);
-        }catch (Exception e){
-            handleJwtException(e);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(handleJwtException(e));
         }
 
-        if (role == null){
+        if (role == null) {
             response.put("code", HttpStatus.FORBIDDEN.value());
             response.put(MESSAGE_KEY, FORBIDDEN_MESSAGE);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(response));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 
-        CompletableFuture<Object> deletionFuture = topUpService.deleteAllTopUp();
-
-        return deletionFuture.thenApply(deleted -> {
+        try {
+            topUpService.deleteAllTopUp();
             response.put("code", HttpStatus.OK.value());
             response.put(MESSAGE_KEY, "All top-ups deleted successfully.");
             return ResponseEntity.ok(response);
-        }).exceptionally(e -> {
-            Map<String, Object> errorResponse = handleInternalError((Exception) e);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = handleInternalError(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        });
+        }
     }
 
 
+
     @DeleteMapping("/{topUpId}/delete")
-    public CompletableFuture<ResponseEntity<Map<String, Object>>> deleteTopUpById(@RequestHeader(value = "Authorization") String token, @PathVariable("topUpId") String topUpId) {
+    public ResponseEntity<Map<String, Object>> deleteTopUpById(@RequestHeader(value = "Authorization") String token, @PathVariable("topUpId") String topUpId) {
         Map<String, Object> response = new HashMap<>();
 
         String role = null;
         try {
             role = jwtAuthFilter.filterToken(token);
-        }catch (Exception e){
-            handleJwtException(e);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(handleJwtException(e));
         }
 
         if (role == null) {
             Map<String, Object> forbiddenResponse = handleForbidden();
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(forbiddenResponse));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(forbiddenResponse);
         }
 
-        return topUpService.deleteTopUpById(topUpId)
-                .thenApply(deleted -> {
-                    if (Boolean.TRUE.equals(deleted)) {
-                        response.put("code", HttpStatus.OK.value());
-                        response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " deleted successfully.");
-                        return ResponseEntity.ok(response);
-                    } else {
-                        response.put("code", HttpStatus.NOT_FOUND.value());
-                        response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-                    }
-                })
-                .exceptionally(e -> {
-                    Map<String, Object> errorResponse = handleInternalError((Exception) e);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+        try {
+            boolean deleted = topUpService.deleteTopUpById(topUpId);
+            if (Boolean.TRUE.equals(deleted)) {
+                response.put("code", HttpStatus.OK.value());
+                response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " deleted successfully.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("code", HttpStatus.NOT_FOUND.value());
+                response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = handleInternalError(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
 
@@ -168,88 +167,91 @@ public class TopUpController {
 
             @PutMapping("/{topUpId}/confirm")
     public CompletableFuture<ResponseEntity<Map<String, Object>>> confirmTopUp(@RequestHeader(value = "Authorization") String token, @PathVariable("topUpId") String topUpId) {
-                Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
 
-                String role = null;
-                try {
-                    role = jwtAuthFilter.filterToken(token);
-                }catch (Exception e){
-                    handleJwtException(e);
-                }
+        String role = null;
+        try {
+            role = jwtAuthFilter.filterToken(token);
+        }catch (Exception e){
+            handleJwtException(e);
+        }
 
-                if (role == null || role.equals("REGULAR")) {
-                    Map<String, Object> forbiddenResponse = handleForbidden();
-                    return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(forbiddenResponse));
-                }
+        if (role == null || role.equals("REGULAR")) {
+            Map<String, Object> forbiddenResponse = handleForbidden();
+            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(forbiddenResponse));
+        }
 
-                return topUpService.confirmTopUp(topUpId)
-                        .thenApply(confirmed -> {
-                            if (Boolean.TRUE.equals(confirmed)) {
-                                response.put("code", HttpStatus.OK.value());
-                                response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " confirmed successfully.");
-                                return ResponseEntity.ok(response);
-                            } else {
-                                response.put("code", HttpStatus.NOT_FOUND.value());
-                                response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
-                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-                            }
-                        })
-                        .exceptionally(e -> {
-                            Map<String, Object> errorResponse = handleInternalError((Exception) e);
-                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                        });
-            }
+        return topUpService.confirmTopUp(topUpId)
+                .thenApply(confirmed -> {
+                    if (Boolean.TRUE.equals(confirmed)) {
+                        response.put("code", HttpStatus.OK.value());
+                        response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + " confirmed successfully.");
+                        return ResponseEntity.ok(response);
+                    } else {
+                        response.put("code", HttpStatus.NOT_FOUND.value());
+                        response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                    }
+                })
+                .exceptionally(e -> {
+                    Map<String, Object> errorResponse = handleInternalError((Exception) e);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                });
+    }
 
-            @GetMapping("/")
-            public CompletableFuture<ResponseEntity<List<TopUp>>> getAllTopUps() {
-                CompletableFuture<List<TopUp>> topUpsFuture = topUpService.findAll();
-                return topUpsFuture.thenApplyAsync(ResponseEntity::ok)
-                        .exceptionally(exception -> {
-                            List<TopUp> emptyList = Collections.emptyList();
-                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(emptyList);
-                        });
-            }
+    @GetMapping("/")
+    public ResponseEntity<List<TopUp>> getAllTopUps() {
+        try {
+            List<TopUp> topUps = topUpService.findAll();
+            return ResponseEntity.ok(topUps);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
+    }
 
     @GetMapping("/waiting")
-    public CompletableFuture<ResponseEntity<List<TopUp>>> getAllWaitingTopUps() {
-        return topUpService.findAllWaiting()
-                .thenApply(ResponseEntity::ok)
-                .exceptionally(e ->  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList())
-                );
+    public ResponseEntity<List<TopUp>> getAllWaitingTopUps() {
+        try {
+            List<TopUp> waitingTopUps = topUpService.findAllWaiting();
+            return ResponseEntity.ok(waitingTopUps);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
     }
 
     @GetMapping("/{topUpId}")
-    public CompletableFuture<ResponseEntity<Map<String, Object>>> getTopUpById(@PathVariable("topUpId") String topUpId) {
-        CompletableFuture<TopUp> topUpFuture = topUpService.findById(topUpId);
-        return topUpFuture.thenApplyAsync(topUp -> {
+    public ResponseEntity<Map<String, Object>> getTopUpById(@PathVariable("topUpId") String topUpId) {
+        try {
+            TopUp topUp = topUpService.findById(topUpId);
             if (topUp == null) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("code", HttpStatus.NOT_FOUND.value());
                 response.put(MESSAGE_KEY, TOP_UP_ID_MESSAGE + topUpId + NOT_FOUND_MESSAGE);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            } else {
+                Map<String, Object> successResponse = new HashMap<>();
+                successResponse.put("topUp", topUp);
+                return ResponseEntity.ok(successResponse);
             }
-            Map<String, Object> successResponse = new HashMap<>();
-            successResponse.put("topUp", topUp);
-            return ResponseEntity.ok(successResponse);
-        }).exceptionally(exception -> {
-            Map<String, Object> errorResponse = handleInternalError((Exception) exception);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = handleInternalError(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        });
+        }
     }
 
-
     @GetMapping("/all/{userId}")
-    public CompletableFuture<ResponseEntity<Map<String, Object>>> getTopUpByUserId(@PathVariable("userId") String userId) {
-        CompletableFuture<List<TopUp>> topUpsFuture = topUpService.findAllByUserId(userId);
-        return topUpsFuture.thenApplyAsync(topUps -> {
+    public ResponseEntity<Map<String, Object>> getTopUpByUserId(@PathVariable("userId") String userId) {
+        try {
+            List<TopUp> topUps = topUpService.findAllByUserId(userId);
             Map<String, Object> successResponse = new HashMap<>();
             successResponse.put("topUps", topUps);
             return ResponseEntity.ok(successResponse);
-        }).exceptionally(exception -> {
-            Map<String, Object> errorResponse = handleInternalError((Exception) exception);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = handleInternalError(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        });
+        }
     }
+
 
     private Map<String, Object> handleJwtException(Exception e) {
         Map<String, Object> response = new HashMap<>();

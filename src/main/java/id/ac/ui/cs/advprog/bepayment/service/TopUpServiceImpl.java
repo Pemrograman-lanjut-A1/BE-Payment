@@ -31,14 +31,12 @@ public class TopUpServiceImpl implements TopUpService {
     private final TopUpRepository topUpRepository;
     private final WalletRepository walletRepository;
     private final WalletService walletService;
-    private final Executor executor;
 
     @Autowired
     public TopUpServiceImpl(TopUpRepository topUpRepository, WalletRepository walletRepository, WalletService walletService, @Qualifier("asyncExecutor") Executor executor) {
         this.topUpRepository = topUpRepository;
         this.walletRepository = walletRepository;
         this.walletService = walletService;
-        this.executor = executor;
     }
 
     @Override
@@ -59,32 +57,6 @@ public class TopUpServiceImpl implements TopUpService {
                     .build();
 
             return topUpRepository.save(topUp);
-        });
-    }
-
-    @Override
-    @Async("asyncExecutor")
-    @Transactional
-    public CompletableFuture<Object> deleteAllTopUp() {
-        topUpRepository.deleteAll();
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    @Async("asyncExecutor")
-    @Transactional
-    public CompletableFuture<Boolean> deleteTopUpById(String topUpId) {
-        return CompletableFuture.supplyAsync(() -> {
-            TopUp topUp = topUpRepository.findById(topUpId);
-            if (topUp == null) {
-                return false;
-            }
-            try {
-                topUpRepository.deleteTopUpById(topUpId);
-                return true;
-            } catch (EmptyResultDataAccessException e) {
-                return false;
-            }
         });
     }
 
@@ -134,30 +106,49 @@ public class TopUpServiceImpl implements TopUpService {
     }
     @Override
     @Transactional
-    @Async("asyncExecutor")
-    public CompletableFuture<TopUp> findById(String topUpId) {
-        return CompletableFuture.supplyAsync(() -> topUpRepository.findById(topUpId), executor);
+    public void deleteAllTopUp() {
+        topUpRepository.deleteAll();
     }
 
     @Override
     @Transactional
-    @Async("asyncExecutor")
-    public CompletableFuture<List<TopUp>> findAll() {
-        return CompletableFuture.supplyAsync(topUpRepository::findAll);
+    public boolean deleteTopUpById(String topUpId) {
+        TopUp topUp = topUpRepository.findById(topUpId);
+        if (topUp == null) {
+            return false;
+        }
+        try {
+            topUpRepository.deleteTopUpById(topUpId);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     @Override
     @Transactional
-    @Async("asyncExecutor")
-    public CompletableFuture<List<TopUp>> findAllWaiting(){
-        return CompletableFuture.supplyAsync(topUpRepository::findAllWaiting);
+    public TopUp findById(String topUpId) {
+        return topUpRepository.findById(topUpId);
     }
+
     @Override
     @Transactional
-    @Async("asyncExecutor")
-    public CompletableFuture<List<TopUp>> findAllByUserId(String userId) {
-        return CompletableFuture.supplyAsync(() -> topUpRepository.findAllByUserId(userId));
+    public List<TopUp> findAll() {
+        return topUpRepository.findAll();
     }
+
+    @Override
+    @Transactional
+    public List<TopUp> findAllWaiting() {
+        return topUpRepository.findAllWaiting();
+    }
+
+    @Override
+    @Transactional
+    public List<TopUp> findAllByUserId(String userId) {
+        return topUpRepository.findAllByUserId(userId);
+    }
+
 
 }
 

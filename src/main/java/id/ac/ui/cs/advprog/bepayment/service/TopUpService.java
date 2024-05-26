@@ -8,12 +8,12 @@ import java.util.concurrent.CompletableFuture;
 
 public interface TopUpService {
     public CompletableFuture<TopUp> createTopUp(TopUpRequest topUp);
-    public CompletableFuture<Object> deleteAllTopUp();
-    public CompletableFuture<Boolean> deleteTopUpById(String topUpId);
+    public void deleteAllTopUp();
+    public boolean deleteTopUpById(String topUpId);
     public CompletableFuture<Boolean> cancelTopUp(String topUpId);
     public CompletableFuture<Boolean> confirmTopUp(String topUpId);
-    public CompletableFuture<TopUp> findById(String topUpId);
-    public CompletableFuture<List<TopUp>> findAll();
-    public CompletableFuture<List<TopUp>> findAllWaiting();
-    public CompletableFuture<List<TopUp>> findAllByUserId(String userId);
+    public TopUp findById(String topUpId);
+    public List<TopUp> findAll();
+    public List<TopUp> findAllWaiting();
+    public List<TopUp> findAllByUserId(String userId);
 }
