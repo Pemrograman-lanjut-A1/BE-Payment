@@ -89,7 +89,6 @@ class TopUpServiceTest {
     @Test
     void deleteTopUpByIdExistingTopUpIdReturnsTrue() {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        TopUp topUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(topUp);
 
         boolean result = topUpService.deleteTopUpById(topUpId);
@@ -105,7 +104,6 @@ class TopUpServiceTest {
     @Test
     void cancelTopUpExistingTopUpIdReturnsTrue() throws ExecutionException, InterruptedException {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        topUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(topUp);
         when(topUpRepository.cancelTopUp(topUpId)).thenReturn(true);
 
