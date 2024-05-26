@@ -87,18 +87,17 @@ class TopUpServiceTest {
     }
 
     @Test
-    void deleteTopUpByIdExistingTopUpIdReturnsTrue() throws ExecutionException, InterruptedException {
+    void deleteTopUpByIdExistingTopUpIdReturnsTrue() {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
-        topUp = new TopUp();
+        TopUp topUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(topUp);
 
-        when(topUpRepository.deleteTopUpById(topUpId)).thenReturn(true);
-
-        boolean result = topUpService.deleteTopUpById(topUpId).get();
+        boolean result = topUpService.deleteTopUpById(topUpId);
 
         assertTrue(result);
         verify(topUpRepository, times(1)).deleteTopUpById(topUpId);
     }
+
 
 
 
@@ -164,10 +163,10 @@ class TopUpServiceTest {
     @Test
     void findByIdExistingTopUpIdReturnsTopUp() {
         String topUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc649";
+        TopUp topUp = new TopUp();
         when(topUpRepository.findById(topUpId)).thenReturn(topUp);
 
-        CompletableFuture<TopUp> futureTopUp = topUpService.findById(topUpId);
-        TopUp foundTopUp = futureTopUp.join();
+        TopUp foundTopUp = topUpService.findById(topUpId);
 
         assertNotNull(foundTopUp);
         assertEquals(topUp, foundTopUp);
@@ -178,49 +177,41 @@ class TopUpServiceTest {
         String nonExistingTopUpId = "3df9d41b-33c3-42a1-b0a4-43cf0ffdc6410";
         when(topUpRepository.findById(nonExistingTopUpId)).thenReturn(null);
 
-        CompletableFuture<TopUp> futureTopUp = topUpService.findById(nonExistingTopUpId);
-
-        TopUp foundTopUp = futureTopUp.join();
+        TopUp foundTopUp = topUpService.findById(nonExistingTopUpId);
 
         assertNull(foundTopUp);
     }
 
-
-
     @Test
-    void findAllReturnsListOfTopUps() throws InterruptedException, ExecutionException {
+    void findAllReturnsListOfTopUps() {
         List<TopUp> expectedTopUps = new ArrayList<>();
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         when(topUpRepository.findAll()).thenReturn(expectedTopUps);
 
-        CompletableFuture<List<TopUp>> foundTopUpsFuture = topUpService.findAll();
-
-        List<TopUp> foundTopUps = foundTopUpsFuture.get();
+        List<TopUp> foundTopUps = topUpService.findAll();
 
         assertNotNull(foundTopUps);
         assertEquals(expectedTopUps.size(), foundTopUps.size());
         assertEquals(expectedTopUps, foundTopUps);
     }
 
-
     @Test
-    void findAllWaitingReturnsListOfTopUps() throws InterruptedException, ExecutionException {
+    void findAllWaitingReturnsListOfTopUps() {
         List<TopUp> expectedTopUps = new ArrayList<>();
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         expectedTopUps.add(new TopUp());
         when(topUpRepository.findAllWaiting()).thenReturn(expectedTopUps);
 
-        CompletableFuture<List<TopUp>> foundTopUpsFuture = topUpService.findAllWaiting();
-
-        List<TopUp> foundTopUps = foundTopUpsFuture.get();
+        List<TopUp> foundTopUps = topUpService.findAllWaiting();
 
         assertNotNull(foundTopUps);
         assertEquals(expectedTopUps.size(), foundTopUps.size());
         assertEquals(expectedTopUps, foundTopUps);
     }
+
 
     @Test
     void deleteAllTopUpCallsRepositoryDeleteAll() {
@@ -236,9 +227,9 @@ class TopUpServiceTest {
         topUps.add(new TopUp());
         when(topUpRepository.findAllByUserId(validUserId)).thenReturn(topUps);
 
-        CompletableFuture<List<TopUp>> result = topUpService.findAllByUserId(validUserId);
+        List<TopUp> result = topUpService.findAllByUserId(validUserId);
 
-        assertEquals(topUps, result.join());
+        assertEquals(topUps, result);
     }
 
     @Test
@@ -248,9 +239,9 @@ class TopUpServiceTest {
         List<TopUp> emptyList = new ArrayList<>();
         when(topUpRepository.findAllByUserId(validUserId)).thenReturn(emptyList);
 
-        CompletableFuture<List<TopUp>> result = topUpService.findAllByUserId(validUserId);
+        List<TopUp> result = topUpService.findAllByUserId(validUserId);
 
-        assertEquals(emptyList, result.join());
+        assertEquals(emptyList, result);
     }
 
     @Test
@@ -259,9 +250,10 @@ class TopUpServiceTest {
         String invalidUserId = "invalidUserId";
         when(topUpRepository.findAllByUserId(invalidUserId)).thenReturn(null);
 
-        CompletableFuture<List<TopUp>> result = topUpService.findAllByUserId(invalidUserId);
+        List<TopUp> result = topUpService.findAllByUserId(invalidUserId);
 
-        assertNull(result.join());
+        assertNull(result);
     }
+
 
 }

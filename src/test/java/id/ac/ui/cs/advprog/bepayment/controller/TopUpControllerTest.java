@@ -78,9 +78,8 @@ class TopUpControllerTest {
     @Test
     void deleteAllTopUpSuccess() {
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
-        when(topUpService.deleteAllTopUp()).thenReturn(CompletableFuture.completedFuture(null));
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken").join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken");
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("All top-ups deleted successfully.", responseEntity.getBody().get("message"));
@@ -90,7 +89,7 @@ class TopUpControllerTest {
     void deleteAllTopUpExpiredJwtToken() {
         when(jwtAuthFilter.filterToken(anyString())).thenThrow(ExpiredJwtException.class);
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken").join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken");
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
     }
@@ -99,7 +98,7 @@ class TopUpControllerTest {
     void deleteAllTopUpEmptyJwtToken() {
         when(jwtAuthFilter.filterToken(anyString())).thenReturn(null);
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken").join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken");
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
         assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
@@ -108,9 +107,9 @@ class TopUpControllerTest {
     @Test
     void deleteAllTopUpInternalServerError() {
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
-        when(topUpService.deleteAllTopUp()).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Some error occurred")));
+        doThrow(new RuntimeException("Some error occurred")).when(topUpService).deleteAllTopUp();
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken").join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteAllTopUp("mockedToken");
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals("Something Wrong With Server", responseEntity.getBody().get("message"));
@@ -120,9 +119,9 @@ class TopUpControllerTest {
     void deleteTopUpByIdSuccess() {
         String topUpId = "mockedTopUpId";
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
-        when(topUpService.deleteTopUpById(topUpId)).thenReturn(CompletableFuture.completedFuture(true));
+        when(topUpService.deleteTopUpById(topUpId)).thenReturn(true);
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", topUpId).join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", topUpId);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("Top-up with ID mockedTopUpId deleted successfully.", responseEntity.getBody().get("message"));
@@ -132,9 +131,9 @@ class TopUpControllerTest {
     void deleteTopUpByIdNotFound() {
         String topUpId = "mockedTopUpId";
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
-        when(topUpService.deleteTopUpById(topUpId)).thenReturn(CompletableFuture.completedFuture(false));
+        when(topUpService.deleteTopUpById(topUpId)).thenReturn(false);
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", topUpId).join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", topUpId);
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals("Top-up with ID mockedTopUpId not found.", responseEntity.getBody().get("message"));
@@ -144,17 +143,16 @@ class TopUpControllerTest {
     void deleteTopUpByIdExpiredJwtToken() {
         when(jwtAuthFilter.filterToken(anyString())).thenThrow(ExpiredJwtException.class);
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", "mockedTopUpId").join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", "mockedTopUpId");
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
     }
-
 
     @Test
     void deleteTopUpByIdEmptyJwtToken() {
         when(jwtAuthFilter.filterToken(anyString())).thenReturn(null);
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", "mockedTopUpId").join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", "mockedTopUpId");
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
         assertEquals("You are not authorized to make this request", responseEntity.getBody().get("message"));
@@ -164,13 +162,14 @@ class TopUpControllerTest {
     void deleteTopUpByIdInternalServerError() {
         String topUpId = "mockedTopUpId";
         when(jwtAuthFilter.filterToken(anyString())).thenReturn("ADMIN");
-        when(topUpService.deleteTopUpById(topUpId)).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Some error occurred")));
+        when(topUpService.deleteTopUpById(topUpId)).thenThrow(new RuntimeException("Some error occurred"));
 
-        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", topUpId).join();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.deleteTopUpById("mockedToken", topUpId);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals("Something Wrong With Server", responseEntity.getBody().get("message"));
     }
+
 
     @Test
     void cancelTopUpSuccess() {
@@ -230,126 +229,90 @@ class TopUpControllerTest {
     @Test
     void testGetAllTopUpsSuccess() {
         List<TopUp> dummyTopUps = Arrays.asList(new TopUp());
-        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(dummyTopUps);
+        when(topUpService.findAll()).thenReturn(dummyTopUps);
 
-        when(topUpService.findAll()).thenReturn(completedFuture);
+        ResponseEntity<List<TopUp>> responseEntity = topUpController.getAllTopUps();
 
-        CompletableFuture<ResponseEntity<List<TopUp>>> responseFuture = topUpController.getAllTopUps();
-
-        responseFuture.thenAccept(responseEntity -> {
-            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-            assertEquals(dummyTopUps, responseEntity.getBody());
-        }).join();
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(dummyTopUps, responseEntity.getBody());
     }
-
 
     @Test
     void testGetAllWaitingTopUpsSuccess() {
         List<TopUp> dummyTopUps = Arrays.asList(new TopUp());
-        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(dummyTopUps);
+        when(topUpService.findAllWaiting()).thenReturn(dummyTopUps);
 
-        when(topUpService.findAllWaiting()).thenReturn(completedFuture);
+        ResponseEntity<List<TopUp>> responseEntity = topUpController.getAllWaitingTopUps();
 
-        CompletableFuture<ResponseEntity<List<TopUp>>> responseFuture = topUpController.getAllWaitingTopUps();
-
-        responseFuture.thenAccept(responseEntity -> {
-            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-            assertEquals(dummyTopUps, responseEntity.getBody());
-        }).join();
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(dummyTopUps, responseEntity.getBody());
     }
-
 
     @Test
     void testGetAllTopUpsInternalServerError() {
-        CompletableFuture<List<TopUp>> future = new CompletableFuture<>();
-        future.completeExceptionally(new RuntimeException("Internal Server Error"));
-        when(topUpService.findAll()).thenReturn(future);
+        when(topUpService.findAll()).thenThrow(new RuntimeException("Internal Server Error"));
 
-        CompletableFuture<ResponseEntity<List<TopUp>>> responseFuture = topUpController.getAllTopUps();
+        ResponseEntity<List<TopUp>> responseEntity = topUpController.getAllTopUps();
 
-        responseFuture.thenAccept(responseEntity -> {
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-            assertEquals(Collections.emptyList(), responseEntity.getBody());
-        }).join();
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(Collections.emptyList(), responseEntity.getBody());
     }
 
     @Test
     void testGetAllWaitingTopUpsInternalServerError() {
-        CompletableFuture<List<TopUp>> future = new CompletableFuture<>();
-        future.completeExceptionally(new RuntimeException("Internal Server Error"));
-        when(topUpService.findAllWaiting()).thenReturn(future);
+        when(topUpService.findAllWaiting()).thenThrow(new RuntimeException("Internal Server Error"));
 
-        CompletableFuture<ResponseEntity<List<TopUp>>> responseFuture = topUpController.getAllWaitingTopUps();
+        ResponseEntity<List<TopUp>> responseEntity = topUpController.getAllWaitingTopUps();
 
-        responseFuture.thenAccept(responseEntity -> {
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-            assertEquals(Collections.emptyList(), responseEntity.getBody());
-        }).join();
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(Collections.emptyList(), responseEntity.getBody());
     }
-
-
-
 
     @Test
     void testGetTopUpByIdSuccessful() {
         String topUpId = "123";
         TopUp expectedTopUp = new TopUp();
-        CompletableFuture<TopUp> future = CompletableFuture.completedFuture(expectedTopUp);
-        when(topUpService.findById(topUpId)).thenReturn(future);
+        when(topUpService.findById(topUpId)).thenReturn(expectedTopUp);
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> responseFuture = topUpController.getTopUpById(topUpId);
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.getTopUpById(topUpId);
 
-        responseFuture.thenAccept(responseEntity -> {
-            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-            assertEquals(expectedTopUp, responseEntity.getBody().get("topUp"));
-        }).join();
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(expectedTopUp, responseEntity.getBody().get("topUp"));
     }
-
 
     @Test
     void testGetTopUpByIdTopUpNotFound() {
         String topUpId = "789";
-        CompletableFuture<TopUp> future = CompletableFuture.completedFuture(null);
-        when(topUpService.findById(topUpId)).thenReturn(future);
+        when(topUpService.findById(topUpId)).thenReturn(null);
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> responseFuture = topUpController.getTopUpById(topUpId);
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.getTopUpById(topUpId);
 
-        responseFuture.thenAccept(responseEntity -> {
-            assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-            assertTrue(responseEntity.getBody().toString().contains("Top-up with ID " + topUpId + " not found"));
-        }).join();
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getBody().toString().contains("Top-up with ID " + topUpId + " not found"));
     }
 
     @Test
     void testGetTopUpByIdInternalServerError() {
         String topUpId = "456";
-        CompletableFuture<TopUp> future = new CompletableFuture<>();
-        future.completeExceptionally(new RuntimeException("Internal Server Error"));
-        when(topUpService.findById(topUpId)).thenReturn(future);
+        when(topUpService.findById(topUpId)).thenThrow(new RuntimeException("Internal Server Error"));
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> responseFuture = topUpController.getTopUpById(topUpId);
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.getTopUpById(topUpId);
 
-        responseFuture.thenAccept(responseEntity -> {
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
 
-            Map<String, Object> responseBody = (Map<String, Object>) responseEntity.getBody();
-            assertNotNull(responseBody);
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseBody.get("code"));
-            assertEquals("Something Wrong With Server", responseBody.get("message"));
-        }).join();
+        Map<String, Object> responseBody = responseEntity.getBody();
+        assertNotNull(responseBody);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseBody.get("code"));
+        assertEquals("Something Wrong With Server", responseBody.get("message"));
     }
 
-
     @Test
-    void testGetTopUpByUserIdSuccess() throws ExecutionException, InterruptedException {
+    void testGetTopUpByUserIdSuccess() {
         String userId = "valid-user-id";
         List<TopUp> dummyTopUps = Arrays.asList(new TopUp(), new TopUp());
-        CompletableFuture<List<TopUp>> completedFuture = CompletableFuture.completedFuture(dummyTopUps);
-        when(topUpService.findAllByUserId(userId)).thenReturn(completedFuture);
+        when(topUpService.findAllByUserId(userId)).thenReturn(dummyTopUps);
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> responseFuture = topUpController.getTopUpByUserId(userId);
-
-        ResponseEntity<Map<String, Object>> responseEntity = responseFuture.get();
+        ResponseEntity<Map<String, Object>> responseEntity = topUpController.getTopUpByUserId(userId);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
@@ -360,17 +323,12 @@ class TopUpControllerTest {
         assertTrue(actualTopUps.containsAll(dummyTopUps));
     }
 
-
     @Test
-    void testGetTopUpByUserIdInternalServerError() throws ExecutionException, InterruptedException {
+    void testGetTopUpByUserIdInternalServerError() {
         String userId = "valid-user-id";
-        CompletableFuture<List<TopUp>> future = new CompletableFuture<>();
-        future.completeExceptionally(new RuntimeException("Internal Server Error"));
-        when(topUpService.findAllByUserId(userId)).thenReturn(future);
+        when(topUpService.findAllByUserId(userId)).thenThrow(new RuntimeException("Internal Server Error"));
 
-        CompletableFuture<ResponseEntity<Map<String, Object>>> responseFuture = topUpController.getTopUpByUserId(userId);
-
-        ResponseEntity<?> responseEntity = responseFuture.get();
+        ResponseEntity<?> responseEntity = topUpController.getTopUpByUserId(userId);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
 
@@ -382,6 +340,7 @@ class TopUpControllerTest {
             fail("Unexpected response body type");
         }
     }
+
 
     @Test
     void confirmTopUpExpiredJwtToken() {
