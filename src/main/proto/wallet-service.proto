@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.bepayment.wallet";
+
+message Wallet {
+  string id = 1;
+  string userId = 2;
+  double amount = 3;
+}
+
+message WalletRequest {
+  string userId = 1;
+}
+
+message AddAmountRequest {
+  string walletId = 1;
+  double amount = 2;
+}
+
+message DecreaseAmountRequest {
+  string walletId = 1;
+  double amount = 2;
+}
+
+message WalletResponse {
+  int32 code = 1;
+  string message = 2;
+  Wallet wallet = 3;
+}
+
+service WalletService {
+  rpc CreateWallet(WalletRequest) returns (WalletResponse);
+  rpc GetWalletById(WalletRequest) returns (WalletResponse);
+  rpc GetWalletByUserId(WalletRequest) returns (WalletResponse);
+  rpc AddAmount(AddAmountRequest) returns (WalletResponse);
+  rpc DecreaseAmount(DecreaseAmountRequest) returns (WalletResponse);
+}
